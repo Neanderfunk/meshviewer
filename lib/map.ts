@@ -105,15 +105,21 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
               maxZoom: layerConfig.maxZoom,
               className: layerConfig.className,
             } as L.LeafletMaplibreGLOptions)
-          : L.tileLayer(
-              layer.url.replace(
-                "{format}",
-                document.createElement("canvas").toDataURL("image/webp").indexOf("data:image/webp") === 0
-                  ? "webp"
-                  : "png",
+          : layerConfig.layers
+            ? // Lokaler Zusatz: WMS statt Kachelsatz. Erkennbar an "layers",
+              // dem Pflichtfeld jeder WMS-Anfrage. Gebraucht fuer die
+              // amtlichen Luftbilder von NRW, die es als Kachelsatz nur ueber
+              // einen Host gibt, den unser Kachel-Proxy nicht kennt.
+              L.tileLayer.wms(layer.url, layerConfig as L.WMSOptions)
+            : L.tileLayer(
+                layer.url.replace(
+                  "{format}",
+                  document.createElement("canvas").toDataURL("image/webp").indexOf("data:image/webp") === 0
+                    ? "webp"
+                    : "png",
+                ),
+                layerConfig,
               ),
-              layerConfig,
-            ),
     };
   });
 

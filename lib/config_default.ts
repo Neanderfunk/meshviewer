@@ -120,6 +120,12 @@ export interface MapLayer {
     end?: number; // Hour
     order: number;
     invertInDarkMode?: boolean;
+    // Lokaler Zusatz: ist "layers" gesetzt, ist es eine WMS-Ebene und wird
+    // als solche angelegt. Amtliche Luftbilder gibt es nur so.
+    layers?: string;
+    format?: string;
+    transparent?: boolean;
+    version?: string;
   };
 }
 
