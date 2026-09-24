@@ -212,6 +212,7 @@ function renderD3Chart(
   spec: string,
   suffix: string,
   configMap: Map<string, ChartSeries> = new Map(),
+  ganzzahlig = false,
 ) {
   const { series: seriesList, xDomain, yDomain } = parsed;
   const seriesColor = (s: Series, i: number) =>
@@ -232,6 +233,20 @@ function renderD3Chart(
   const yAxis = axisLeft(yScale)
     .ticks(4)
     .tickFormat((d) => fmt(d));
+
+  // Ganzzahlige Groessen bekommen auch ganzzahlige Striche. Bei kleinen
+  // Wertebereichen jeder Schritt, bei grossen nur jeder n-te, damit es nicht
+  // zu eng wird.
+  if (ganzzahlig) {
+    const [u, o] = yScale.domain() as [number, number];
+    const von = Math.floor(u);
+    const bis = Math.ceil(o);
+    const schritt = Math.max(1, Math.ceil((bis - von) / 4));
+    const werte: number[] = [];
+    for (let v = von; v <= bis; v += schritt) werte.push(v);
+    yScale.domain([von, Math.max(bis, von + 1)]);
+    yAxis.tickValues(werte.length > 1 ? werte : [von, von + 1]);
+  }
 
   // Probe y-axis label width by rendering into a temporary SVG in the DOM
   const svgEl = select(container).append("svg").attr("width", "100%");
@@ -401,7 +416,7 @@ async function zeichneDiagramm(el: HTMLElement, chart: Chart, subst: Record<stri
       el.textContent = _.t("node.chartNoData", { name: chart.name });
       return;
     }
-    renderD3Chart(el, parsed, chart.format ?? ".2~s", chart.unitSuffix ?? "", configMap);
+    renderD3Chart(el, parsed, chart.format ?? ".2~s", chart.unitSuffix ?? "", configMap, chart.integer);
   } catch {
     el.textContent = _.t("node.chartError", { name: chart.name });
   }

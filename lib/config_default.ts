@@ -81,6 +81,10 @@ export interface Chart {
   // Nur fuer prometheus-direct: Beschriftung der Reihen, {{label}} wird
   // durch den Wert des Labels ersetzt
   legendFormat?: string;
+  // Werte, die es nur ganzzahlig gibt (Clients, Zaehler). Dann bekommt die
+  // Achse auch nur ganze Zahlen; sonst setzt d3 Striche bei 0,5 und 1,5, und
+  // ein Format ohne Nachkommastellen macht daraus zweimal 0 und zweimal 1.
+  integer?: boolean;
   datasourceUid: string;
   datasourceType: string;
   query: string;
