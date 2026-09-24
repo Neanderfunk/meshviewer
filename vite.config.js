@@ -91,7 +91,12 @@ export default defineConfig(({ command, mode }) => ({
         globPatterns: ["**/*.{js,css,html,ico,png,svg,ttf,woff,woff2}"],
         // Matched against pathname + search: keep the index.html fallback off
         // real files, otherwise /sw.js is served as the app itself.
-        navigateFallbackDenylist: [/\.[a-z0-9]+(\?|$)/i],
+        // Lokaler Zusatz: alles unter /grafana/ und /nf/ gehoert nicht zur
+        // Anwendung, sondern ist Grafana bzw. unsere Datenschnittstelle.
+        // Ohne diese Ausnahmen liefert der Service Worker dort die Karte
+        // selbst aus, und ein Link ins Grafana landet in der Ladeanzeige
+        // des Meshviewers (23.09.2026).
+        navigateFallbackDenylist: [/\.[a-z0-9]+(\?|$)/i, /^\/grafana\//, /^\/nf\//],
         cleanupOutdatedCaches: true,
       },
       manifest: {
