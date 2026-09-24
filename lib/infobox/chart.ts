@@ -9,7 +9,7 @@ import { timeFormat } from "d3-time-format";
 import { format as d3Format } from "d3-format";
 import { schemeTableau10 } from "d3-scale-chromatic";
 import { _ } from "../utils/language.js";
-import { Chart, ChartRange, ChartSeries } from "../config_default.js";
+import { Chart, ChartRange, ChartSeries, NodeValue } from "../config_default.js";
 
 interface Series {
   name: string;
@@ -465,6 +465,51 @@ export function createChartsVNode(charts: Chart[], subst: Record<string, string>
         });
 
         zeichneAlle();
+      },
+    },
+  });
+}
+
+// --- Wertezeilen ------------------------------------------------------------
+// Lokaler Zusatz: ein einzelner Wert aus den Zeitreihen als Zeile in der
+// Attributtabelle. Liefert die Abfrage nichts, verschwindet die ganze Zeile;
+// ein Geraet ohne Funk soll keine leere Kanalzeile bekommen.
+
+export function createNodeValueVNode(wert: NodeValue, subst: Record<string, string>): VNode {
+  return h("td", {
+    hook: {
+      insert: async (vnode: VNode) => {
+        const el = vnode.elm as HTMLElement;
+        const prometheus = window.config.prometheus;
+        if (!prometheus) {
+          el.parentElement?.remove();
+          return;
+        }
+        try {
+          const url = `${prometheus.url.replace(/\/$/, "")}/api/v1/query?query=${encodeURIComponent(
+            applySubst(wert.query, subst),
+          )}`;
+          const antwort = await fetch(url, { mode: "cors", credentials: "omit" });
+          if (!antwort.ok) throw new Error(`HTTP ${antwort.status}`);
+          const json = await antwort.json();
+          const reihen: any[] = json?.data?.result ?? [];
+          const fmt = d3Format(wert.format ?? ".0f");
+          const teile = reihen
+            .map((r) => {
+              const v = Number(r.value?.[1]);
+              if (!Number.isFinite(v)) return null;
+              const name = promName(r.metric ?? {}, wert.legendFormat);
+              return `${name ? name + ": " : ""}${fmt(v)}${wert.unitSuffix ?? ""}`;
+            })
+            .filter((t): t is string => t !== null);
+          if (!teile.length) {
+            el.parentElement?.remove();
+            return;
+          }
+          el.textContent = teile.join(" \u00b7 ");
+        } catch {
+          el.parentElement?.remove();
+        }
       },
     },
   });

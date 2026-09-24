@@ -5,7 +5,7 @@ import { SortTable } from "../sorttable.js";
 import * as helper from "../utils/helper.js";
 import nodef, { Neighbour, Node as NodeData, NodeId } from "../utils/node.js";
 import { NodeInfo } from "../config_default.js";
-import { createChartsVNode } from "./chart.js";
+import { createChartsVNode, createNodeValueVNode } from "./chart.js";
 import { ObjectsLinksAndNodes } from "../datadistributor.js";
 
 // `config.nodeAttr.value` may be either a function or a string. When it is a
@@ -236,6 +236,11 @@ export function Node(el: HTMLElement, node: NodeData, linkScale: (t: any) => any
         }
       });
       attributeRows.push(h("tr", [h("th", _.t("node.gateway")), showGateway(node)]));
+
+      // Zeilen, deren Wert aus den Zeitreihen kommt (lokaler Zusatz)
+      for (const wert of config.nodeValues ?? []) {
+        attributeRows.push(h("tr", [h("th", wert.name), createNodeValueVNode(wert, { node: node.node_id })]));
+      }
       const attributeTable = h("table", { props: { className: "attributes" } }, attributeRows);
 
       // Deprecation warning

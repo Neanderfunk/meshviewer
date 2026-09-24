@@ -69,6 +69,16 @@ export interface ChartRange {
   name: string;
   from: string;
 }
+// Lokaler Zusatz: eine Zeile in der Attributtabelle des Knotens, deren Wert
+// aus den Zeitreihen kommt. Fuer Dinge, die respondd zwar misst, aber nicht in
+// nodes.json schreibt, etwa die belegten Funkkanaele.
+export interface NodeValue {
+  name: string;
+  query: string;
+  legendFormat?: string;
+  format?: string;
+  unitSuffix?: string;
+}
 
 export interface ChartSeries {
   name: string;
@@ -228,6 +238,7 @@ export interface Config {
   nodeInfos: NodeInfo[];
   grafana?: GrafanaConfig;
   prometheus?: PrometheusConfig;
+  nodeValues?: NodeValue[];
   chartRanges?: ChartRange[];
   nodeCharts: Chart[];
   linkCharts: Chart[];
@@ -548,6 +559,7 @@ export const config: Config = {
   linkInfos: [],
   nodeInfos: [],
   nodeCharts: [],
+  nodeValues: [],
   linkCharts: [],
   globalCharts: [],
   node_custom: "",
