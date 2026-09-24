@@ -136,6 +136,18 @@ export interface Config {
     other: string;
   };
   map: {
+    // Beschriftung der Knoten auf der Karte. Ohne diese drei Werte nimmt die
+    // Beschriftungsebene die Farben des Seitenkoerpers, und im Dunkelmodus
+    // heisst das helle Schrift mit dunklem Saum. Auf einer hellen Karte, die
+    // nicht mit invert-in-dark-mode umgedreht wird, ist das unlesbar.
+    // Leer oder 0 laesst alles wie gehabt. Die Dark-Varianten gelten,
+    // solange das Dunkelthema aktiv ist; sind sie leer, bleibt es dort beim
+    // Verhalten des Themas.
+    labelShadowColor: string;
+    labelColor: string;
+    labelShadowColorDark: string;
+    labelColorDark: string;
+    labelOffset: number;
     labelNewColor: string;
     tqFrom: string;
     tqTo: string;
@@ -341,6 +353,11 @@ export const config: Config = {
     other: "rgba(227, 166, 25, 0.7)",
   },
   map: {
+    labelShadowColor: "",
+    labelColor: "",
+    labelShadowColorDark: "",
+    labelColorDark: "",
+    labelOffset: 0,
     labelNewColor: "#459C18",
     tqFrom: "#F02311",
     tqTo: "#04C714",
