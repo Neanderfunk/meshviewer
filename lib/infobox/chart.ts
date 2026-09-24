@@ -92,6 +92,82 @@ async function fetchChartData(
   return response.json();
 }
 
+// --- prometheus-direct ------------------------------------------------------
+// Unser Weg ohne Grafana: die Prometheus-API von VictoriaMetrics beantwortet
+// query_range direkt. Grafana wuerde hier nur uebersetzen und dafuer als
+// eigener Dienst laufen. Alles Weitere, Zeichnen und Tabelle, bleibt gleich.
+
+function promName(metric: Record<string, string>, legendFormat?: string): string {
+  if (legendFormat) {
+    return legendFormat.replace(/{{\s*([\w.]+)\s*}}/g, (_m, k: string) => metric[k] ?? "");
+  }
+  const n = metric["__name__"];
+  if (n) return n.replace(/^\w+[._]/, "");
+  const rest = Object.entries(metric).filter(([k]) => k !== "__name__");
+  return rest.length ? rest.map(([k, v]) => `${k}=${v}`).join(" ") : "Wert";
+}
+
+async function fetchPrometheusDirect(
+  baseUrl: string,
+  chart: Chart,
+  subst: Record<string, string>,
+  configMap: Map<string, ChartSeries>,
+): Promise<ParsedChart> {
+  const from = parseRelativeMs(chart.from ?? "now-7d");
+  const to = parseRelativeMs(chart.to ?? "now-1m");
+  const maxDataPoints = chart.maxDataPoints ?? 300;
+  // Die Sammelrunde laeuft alle fuenf Minuten, feiner hat es keinen Sinn.
+  const step = Math.max(300, Math.round((to - from) / 1000 / maxDataPoints));
+  const params = new URLSearchParams({
+    query: applySubst(chart.query, subst),
+    start: String(Math.floor(from / 1000)),
+    end: String(Math.floor(to / 1000)),
+    step: String(step),
+  });
+  const response = await fetch(`${baseUrl}/api/v1/query_range?${params.toString()}`, {
+    method: "GET",
+    mode: "cors",
+    credentials: "omit",
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const json = await response.json();
+
+  const series: Series[] = [];
+  let tMin = Infinity,
+    tMax = -Infinity,
+    vMin = Infinity,
+    vMax = -Infinity;
+  for (const result of json?.data?.result ?? []) {
+    const name = promName(result.metric ?? {}, chart.legendFormat);
+    // negate wie beim Grafana-Weg: damit sich Senden und Empfangen
+    // gegenueberstellen lassen
+    const negate = configMap.get(name)?.negate ?? false;
+    const points: { t: Date; v: number | null }[] = [];
+    let last: number | null = null;
+    for (const [ts, raw] of result.values ?? []) {
+      const t = ts * 1000;
+      // Fehlende Runden als Luecke zeichnen und nicht als gerade Linie
+      if (last !== null && t - last > step * 2000) {
+        points.push({ t: new Date(last + step * 1000), v: null });
+      }
+      const v = Number(raw);
+      const wert = Number.isFinite(v) ? (negate ? -v : v) : null;
+      points.push({ t: new Date(t), v: wert });
+      last = t;
+      if (t < tMin) tMin = t;
+      if (t > tMax) tMax = t;
+      if (wert !== null) {
+        if (wert < vMin) vMin = wert;
+        if (wert > vMax) vMax = wert;
+      }
+    }
+    if (points.length) {
+      series.push({ name, points });
+    }
+  }
+  return { series, xDomain: [tMin, tMax], yDomain: [Math.min(vMin, 0), Math.max(vMax, 1)] };
+}
+
 function parseResults(results: Record<string, any>, configMap: Map<string, ChartSeries>): ParsedChart {
   const series: Series[] = [];
   let tMin = Infinity,
@@ -252,14 +328,17 @@ function renderD3Chart(
 }
 
 export function createChartVNode(chart: Chart, subst: Record<string, string>): VNode {
+  const direkt = chart.datasourceType === "prometheus-direct";
   const grafana = window.config.grafana;
-  if (!grafana) {
-    console.warn(`Grafana config missing`);
+  const prometheus = window.config.prometheus;
+  if (direkt ? !prometheus : !grafana) {
+    console.warn(direkt ? `Prometheus config missing` : `Grafana config missing`);
     return h("div");
   }
 
-  const grafanaUrl = grafana.url.replace(/\/$/, "");
-  const orgId = grafana.orgId ?? 1;
+  const grafanaUrl = (grafana?.url ?? "").replace(/\/$/, "");
+  const promUrl = (prometheus?.url ?? "").replace(/\/$/, "");
+  const orgId = grafana?.orgId ?? 1;
 
   return h("div", {
     class: { "node-chart": true },
@@ -268,10 +347,11 @@ export function createChartVNode(chart: Chart, subst: Record<string, string>): V
         const el = vnode.elm as HTMLElement;
         el.textContent = _.t("loading", { name: chart.name });
         try {
-          const json = await fetchChartData(grafanaUrl, orgId, chart, subst);
-          el.textContent = "";
           const configMap = new Map((chart.series ?? []).map((s) => [s.name, s]));
-          const parsed = parseResults(json.results ?? {}, configMap);
+          const parsed = direkt
+            ? await fetchPrometheusDirect(promUrl, chart, subst, configMap)
+            : parseResults((await fetchChartData(grafanaUrl, orgId, chart, subst)).results ?? {}, configMap);
+          el.textContent = "";
           if (parsed.series.length === 0 || !Number.isFinite(parsed.xDomain[0])) {
             el.textContent = _.t("node.chartNoData", { name: chart.name });
             return;

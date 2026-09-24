@@ -58,6 +58,12 @@ export interface GrafanaConfig {
   url: string;
   orgId?: number;
 }
+// Lokaler Zusatz: Zeitreihen direkt aus einer Prometheus-API lesen
+// (VictoriaMetrics), ohne ein Grafana dazwischen. Ein Chart nimmt diesen Weg
+// mit datasourceType "prometheus-direct".
+export interface PrometheusConfig {
+  url: string;
+}
 
 export interface ChartSeries {
   name: string;
@@ -67,6 +73,9 @@ export interface ChartSeries {
 
 export interface Chart {
   name: string;
+  // Nur fuer prometheus-direct: Beschriftung der Reihen, {{label}} wird
+  // durch den Wert des Labels ersetzt
+  legendFormat?: string;
   datasourceUid: string;
   datasourceType: string;
   query: string;
@@ -209,6 +218,7 @@ export interface Config {
   linkInfos: LinkInfo[];
   nodeInfos: NodeInfo[];
   grafana?: GrafanaConfig;
+  prometheus?: PrometheusConfig;
   nodeCharts: Chart[];
   linkCharts: Chart[];
   globalCharts: Chart[];
