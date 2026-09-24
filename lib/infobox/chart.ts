@@ -9,7 +9,7 @@ import { timeFormat } from "d3-time-format";
 import { format as d3Format } from "d3-format";
 import { schemeTableau10 } from "d3-scale-chromatic";
 import { _ } from "../utils/language.js";
-import { Chart, ChartSeries } from "../config_default.js";
+import { Chart, ChartRange, ChartSeries } from "../config_default.js";
 
 interface Series {
   name: string;
@@ -360,6 +360,96 @@ export function createChartVNode(chart: Chart, subst: Record<string, string>): V
         } catch {
           el.textContent = _.t("node.chartError", { name: chart.name });
         }
+      },
+    },
+  });
+}
+
+// --- Zeitraeume -------------------------------------------------------------
+// Lokaler Zusatz: eine Leiste ueber den Diagrammen, mit der sich der Zeitraum
+// aller Diagramme eines Knotens gemeinsam umschalten laesst. Die Wahl bleibt
+// erhalten, solange die Seite offen ist, auch beim Wechsel des Knotens.
+
+const STANDARD_ZEITRAEUME: ChartRange[] = [
+  { name: "24 h", from: "now-24h" },
+  { name: "7 Tage", from: "now-7d" },
+  { name: "30 Tage", from: "now-30d" },
+];
+
+let gewaehlterZeitraum = 1;
+
+async function zeichneDiagramm(el: HTMLElement, chart: Chart, subst: Record<string, string>) {
+  const direkt = chart.datasourceType === "prometheus-direct";
+  const grafana = window.config.grafana;
+  const prometheus = window.config.prometheus;
+  if (direkt ? !prometheus : !grafana) {
+    console.warn(direkt ? `Prometheus config missing` : `Grafana config missing`);
+    return;
+  }
+  el.textContent = _.t("loading", { name: chart.name });
+  try {
+    const configMap = new Map((chart.series ?? []).map((s) => [s.name, s]));
+    const parsed = direkt
+      ? await fetchPrometheusDirect((prometheus!.url ?? "").replace(/\/$/, ""), chart, subst, configMap)
+      : parseResults(
+          (await fetchChartData((grafana!.url ?? "").replace(/\/$/, ""), grafana!.orgId ?? 1, chart, subst)).results ??
+            {},
+          configMap,
+        );
+    el.textContent = "";
+    if (parsed.series.length === 0 || !Number.isFinite(parsed.xDomain[0])) {
+      el.textContent = _.t("node.chartNoData", { name: chart.name });
+      return;
+    }
+    renderD3Chart(el, parsed, chart.format ?? ".2~s", chart.unitSuffix ?? "", configMap);
+  } catch {
+    el.textContent = _.t("node.chartError", { name: chart.name });
+  }
+}
+
+export function createChartsVNode(charts: Chart[], subst: Record<string, string>): VNode {
+  const zeitraeume = window.config.chartRanges ?? STANDARD_ZEITRAEUME;
+  if (gewaehlterZeitraum >= zeitraeume.length) gewaehlterZeitraum = 0;
+
+  return h("div", {
+    hook: {
+      insert: (vnode: VNode) => {
+        const wurzel = vnode.elm as HTMLElement;
+        const leiste = document.createElement("div");
+        leiste.className = "node-chart-ranges";
+        wurzel.appendChild(leiste);
+
+        const flaechen: HTMLElement[] = charts.map((chart) => {
+          const titel = document.createElement("h4");
+          titel.textContent = chart.name;
+          wurzel.appendChild(titel);
+          const el = document.createElement("div");
+          el.className = "node-chart";
+          wurzel.appendChild(el);
+          return el;
+        });
+
+        const zeichneAlle = () => {
+          const zeitraum = zeitraeume[gewaehlterZeitraum]!;
+          Array.from(leiste.children).forEach((b, i) => b.classList.toggle("active", i === gewaehlterZeitraum));
+          charts.forEach((chart, i) => {
+            flaechen[i]!.textContent = "";
+            void zeichneDiagramm(flaechen[i]!, { ...chart, from: zeitraum.from, to: chart.to ?? "now" }, subst);
+          });
+        };
+
+        zeitraeume.forEach((zeitraum, i) => {
+          const knopf = document.createElement("button");
+          knopf.type = "button";
+          knopf.textContent = zeitraum.name;
+          knopf.addEventListener("click", () => {
+            gewaehlterZeitraum = i;
+            zeichneAlle();
+          });
+          leiste.appendChild(knopf);
+        });
+
+        zeichneAlle();
       },
     },
   });

@@ -5,7 +5,7 @@ import { SortTable } from "../sorttable.js";
 import * as helper from "../utils/helper.js";
 import nodef, { Neighbour, Node as NodeData, NodeId } from "../utils/node.js";
 import { NodeInfo } from "../config_default.js";
-import { createChartVNode } from "./chart.js";
+import { createChartsVNode } from "./chart.js";
 import { ObjectsLinksAndNodes } from "../datadistributor.js";
 
 // `config.nodeAttr.value` may be either a function or a string. When it is a
@@ -285,11 +285,8 @@ export function Node(el: HTMLElement, node: NodeData, linkScale: (t: any) => any
 
       // Charts
       if (config.nodeCharts.length) {
-        const charts = config.nodeCharts.flatMap((chart) => [
-          h("h4", chart.name),
-          createChartVNode(chart, { node: node.node_id }),
-        ]);
-        containerChildren.push(h("div", charts));
+        // Eine gemeinsame Zeitraumleiste fuer alle Diagramme des Knotens
+        containerChildren.push(createChartsVNode(config.nodeCharts, { node: node.node_id }));
       }
 
       const newContainer = h("div", containerChildren);

@@ -64,6 +64,11 @@ export interface GrafanaConfig {
 export interface PrometheusConfig {
   url: string;
 }
+// Lokaler Zusatz: waehlbare Zeitraeume ueber den Diagrammen im Knotenfenster
+export interface ChartRange {
+  name: string;
+  from: string;
+}
 
 export interface ChartSeries {
   name: string;
@@ -219,6 +224,7 @@ export interface Config {
   nodeInfos: NodeInfo[];
   grafana?: GrafanaConfig;
   prometheus?: PrometheusConfig;
+  chartRanges?: ChartRange[];
   nodeCharts: Chart[];
   linkCharts: Chart[];
   globalCharts: Chart[];
