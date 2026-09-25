@@ -29,3 +29,12 @@
     cursor: pointer;
   }
 }
+
+// Lokaler Zusatz (Neanderfunk): Links oben in der Statistik
+.statistics-links {
+  font-weight: bold;
+
+  a + a {
+    margin-left: 1em;
+  }
+}

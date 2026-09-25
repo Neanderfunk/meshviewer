@@ -301,6 +301,23 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
   }
 
   self.render = function render(el: HTMLElement) {
+    // Lokaler Zusatz (Neanderfunk): Links ganz oben in der Statistik, etwa zur
+    // Gesamtsicht in Grafana. Die Tabellen hier zeigen den Stand jetzt, die
+    // Verlaeufe stehen dort.
+    if (config.statisticsLinks?.length) {
+      const links = document.createElement("p");
+      links.classList.add("statistics-links");
+      config.statisticsLinks.forEach(function (link) {
+        const a = document.createElement("a");
+        a.textContent = link.title;
+        a.href = link.href;
+        a.target = "_blank";
+        a.rel = "noopener";
+        links.appendChild(a);
+      });
+      el.appendChild(links);
+    }
+
     self.renderSingle(el, "node.status");
     self.renderSingle(el, "node.firmware");
     self.renderSingle(el, "node.baseversion");

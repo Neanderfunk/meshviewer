@@ -139,6 +139,8 @@ export interface Config {
   dataPath: string[];
   mapLayers: MapLayer[];
   linkList?: Link[];
+  // Lokaler Zusatz (Neanderfunk): Links oben in der Statistik
+  statisticsLinks?: Link[];
   reverseGeocodingApi: string;
   maxAge: number;
   maxAgeAlert: number;
