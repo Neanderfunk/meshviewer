@@ -42,6 +42,7 @@
     "location": "Poloha",
     "latitude": "Zeměpisná šířka",
     "longitude": "Zeměpisná délka",
+    "latlng": "Šířka, délka",
     "copy": "Kopírovat"
   },
   "sidebar": {

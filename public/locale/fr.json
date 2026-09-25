@@ -42,6 +42,7 @@
     "location": "Lieu",
     "latitude": "Latitude",
     "longitude": "Longitude",
+    "latlng": "Latitude, longitude",
     "copy": "Copier"
   },
   "sidebar": {

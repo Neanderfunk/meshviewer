@@ -36,6 +36,14 @@ export const location = function (el: HTMLElement, position: TargetLocation) {
   editLng.value = position.lng.toFixed(9);
   el.appendChild(createBox("lng", _.t("location.longitude"), editLng));
 
+  // Neanderfunk: beides in einer Zeile, wie es etwa der UniFi-Controller im
+  // Feld SNMP Location erwartet
+  let editLatLng = document.createElement("input");
+  editLatLng.setAttribute("aria-label", _.t("location.latlng"));
+  editLatLng.type = "text";
+  editLatLng.value = position.lat.toFixed(9) + ", " + position.lng.toFixed(9);
+  el.appendChild(createBox("latlng", _.t("location.latlng"), editLatLng));
+
   let editUci = document.createElement("textarea");
   editUci.setAttribute("aria-label", "Uci");
   editUci.value =

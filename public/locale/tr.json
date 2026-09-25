@@ -42,6 +42,7 @@
     "location": "Konum",
     "latitude": "Enlem",
     "longitude": "Boylam",
+    "latlng": "Enlem, boylam",
     "copy": "Kopya"
   },
   "sidebar": {
