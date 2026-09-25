@@ -16,6 +16,7 @@ besteht die Tests des Projekts.
 | Ganzzahlige Achsen | keine halben Clients mehr an der Achse |
 | Wertezeilen | Zeilen im Knotenfenster aus den Zeitreihen, etwa die Funkkanäle |
 | WMS-Ebenen | amtliche Luftbilder als Grundkarte |
+| Koordinaten in einer Zeile | Standortwahl bietet "Breite, Länge" zum Kopieren, etwa für den UniFi-Controller |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
 Zweig wie das Original.
