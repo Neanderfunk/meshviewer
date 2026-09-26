@@ -188,7 +188,21 @@ export function Node(el: HTMLElement, node: NodeData, linkScale: (t: any) => any
 
   const self = {
     render() {
-      const containerChildren: (VNode | string)[] = [h("h2", node.hostname)];
+      // Lokaler Zusatz (Neanderfunk): unauffaelliges Zahnrad zum Service-Menue
+      const titel: (VNode | string)[] = [node.hostname];
+      if (config.serviceLink) {
+        titel.push(
+          h("a.ion-gear.service-link", {
+            props: {
+              href: config.serviceLink.href.replace("{NODE_ID}", encodeURIComponent(node.node_id)),
+              title: config.serviceLink.title,
+              rel: "nofollow",
+            },
+            attrs: { "aria-label": config.serviceLink.title },
+          }),
+        );
+      }
+      const containerChildren: (VNode | string)[] = [h("h2", titel)];
 
       // Device picture
       const devicePictures = showDevicePictures(config.devicePictures, node);

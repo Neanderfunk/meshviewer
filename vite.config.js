@@ -96,7 +96,7 @@ export default defineConfig(({ command, mode }) => ({
         // Ohne diese Ausnahmen liefert der Service Worker dort die Karte
         // selbst aus, und ein Link ins Grafana landet in der Ladeanzeige
         // des Meshviewers (23.09.2026).
-        navigateFallbackDenylist: [/\.[a-z0-9]+(\?|$)/i, /^\/grafana\//, /^\/nf\//],
+        navigateFallbackDenylist: [/\.[a-z0-9]+(\?|$)/i, /^\/grafana\//, /^\/nf\//, /^\/outpost\.goauthentik\.io\//],
         cleanupOutdatedCaches: true,
       },
       manifest: {

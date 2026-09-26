@@ -51,3 +51,17 @@
     resize: vertical;
   }
 }
+
+// Lokaler Zusatz (Neanderfunk): Zahnrad zum Service-Menue, klein und blass
+.service-link {
+  font-size: 0.6em;
+  margin-left: 0.5em;
+  opacity: 0.35;
+  text-decoration: none;
+  vertical-align: middle;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+}

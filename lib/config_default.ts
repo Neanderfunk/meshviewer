@@ -139,6 +139,9 @@ export interface Config {
   dataPath: string[];
   mapLayers: MapLayer[];
   linkList?: Link[];
+  // Lokaler Zusatz (Neanderfunk): kleines Zahnrad neben dem Knotennamen, das
+  // auf eine Service-Seite fuehrt; {NODE_ID} wird ersetzt
+  serviceLink?: Link;
   // Lokaler Zusatz (Neanderfunk): Links oben in der Statistik
   statisticsLinks?: Link[];
   reverseGeocodingApi: string;
