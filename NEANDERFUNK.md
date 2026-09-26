@@ -18,6 +18,7 @@ besteht die Tests des Projekts.
 | WMS-Ebenen | amtliche Luftbilder als Grundkarte |
 | Koordinaten in einer Zeile | Standortwahl bietet "Breite, Länge" zum Kopieren, etwa für den UniFi-Controller |
 | Links oben in der Statistik | `statisticsLinks`: etwa zur Gesamtsicht in Grafana |
+| Zahnrad zum Service-Menü | `serviceLink`: kleines Zahnrad neben dem Knotennamen; Service Worker lässt die Anmeldung durch |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
 Zweig wie das Original.
