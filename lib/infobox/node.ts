@@ -6,6 +6,7 @@ import * as helper from "../utils/helper.js";
 import nodef, { Neighbour, Node as NodeData, NodeId } from "../utils/node.js";
 import { NodeInfo } from "../config_default.js";
 import { createChartsVNode, createNodeValueVNode } from "./chart.js";
+import { createAirtimeRows } from "./airtime.js";
 import { ObjectsLinksAndNodes } from "../datadistributor.js";
 
 // `config.nodeAttr.value` may be either a function or a string. When it is a
@@ -221,6 +222,12 @@ export function Node(el: HTMLElement, node: NodeData, linkScale: (t: any) => any
       const showers: NodefShowers = nodef;
       const nodeRecord: NodeRecord = node as unknown as NodeRecord;
 
+      // Airtime je Band hinter der Systemlast (lokaler Zusatz); fehlt die
+      // Bezugszeile, kommen die Zeilen ans Ende der Tabelle
+      const airtimeRows = config.airtime ? createAirtimeRows(config.airtime, node.node_id) : [];
+      const airtimeAfter = config.airtime?.after ?? "node.systemLoad";
+      let airtimePlaced = false;
+
       config.nodeAttr.forEach(function (row) {
         let field: NodeFieldValue;
         if (typeof row.value === "function") {
@@ -247,8 +254,15 @@ export function Node(el: HTMLElement, node: NodeData, linkScale: (t: any) => any
           }
           rowCells.push(cell);
           attributeRows.push(h("tr", rowCells));
+          if (row.name === airtimeAfter && !airtimePlaced) {
+            attributeRows.push(...airtimeRows);
+            airtimePlaced = true;
+          }
         }
       });
+      if (!airtimePlaced) {
+        attributeRows.push(...airtimeRows);
+      }
       attributeRows.push(h("tr", [h("th", _.t("node.gateway")), showGateway(node)]));
 
       // Zeilen, deren Wert aus den Zeitreihen kommt (lokaler Zusatz)

@@ -31,3 +31,23 @@
     white-space: nowrap;
   }
 }
+
+// Lokaler Zusatz: Airtime wie bei HopGlass, empfangen, gesendet und der Rest
+// der Belegung nebeneinander
+.bar.airtime {
+  span {
+    vertical-align: top;
+  }
+
+  .rx {
+    background: variables.$color-new;
+  }
+
+  .tx {
+    background: #e95520;
+  }
+
+  .other {
+    background: #205580;
+  }
+}

@@ -80,6 +80,21 @@ export interface NodeValue {
   unitSuffix?: string;
 }
 
+// Lokaler Zusatz: Airtime je Funkband als Balken, wie ihn HopGlass zeigt.
+// Die Abfrage liefert je Band (Label "band") vier Reihen, unterschieden am
+// Label "wert": busy (Kanal belegt, Prozent), rx und tx (davon empfangen und
+// gesendet, Prozent) und frequency (MHz, ergibt die Kanalnummer). Die Zeilen
+// stehen hinter der Zeile "after" der Attributtabelle.
+export interface AirtimeBand {
+  band: string;
+  name: string;
+}
+export interface AirtimeConfig {
+  query: string;
+  bands: AirtimeBand[];
+  after?: string;
+}
+
 export interface ChartSeries {
   name: string;
   color?: string;
@@ -250,6 +265,7 @@ export interface Config {
   grafana?: GrafanaConfig;
   prometheus?: PrometheusConfig;
   nodeValues?: NodeValue[];
+  airtime?: AirtimeConfig;
   chartRanges?: ChartRange[];
   nodeCharts: Chart[];
   linkCharts: Chart[];
