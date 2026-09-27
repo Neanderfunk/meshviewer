@@ -234,6 +234,17 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
     map.fitBounds(bounds, { maxZoom: zoom ? zoom : config.nodeZoom });
   }
 
+  // Lokaler Zusatz: die Seitenleiste liegt ueber der Karte. Beim
+  // Startausschnitt den Streifen unter ihr aussparen, sonst verschwindet der
+  // Westrand der Knoten dahinter. Auf schmalen Bildschirmen, wo sie fast die
+  // ganze Breite einnimmt, bleibt es beim ganzen Kartenfeld.
+  function sidebarPadding(): L.PointTuple {
+    const sidebarEl = document.querySelector<HTMLElement>(".sidebar");
+    if (!sidebarEl || sidebarEl.classList.contains("hidden")) return [0, 0];
+    const right = sidebarEl.getBoundingClientRect().right;
+    return right > 0 && right < map.getSize().x / 2 ? [right, 0] : [0, 0];
+  }
+
   function goto(element: { getLatLng: () => L.LatLngExpression; getBounds?: () => L.LatLngBoundsExpression }) {
     let bounds: L.LatLngBoundsExpression;
 
@@ -275,7 +286,7 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
       } else if (savedView) {
         map.setView(savedView.center, savedView.zoom);
       } else if (config.fixedCenter) {
-        setView(config.fixedCenter);
+        map.fitBounds(config.fixedCenter, { maxZoom: config.nodeZoom, paddingTopLeft: sidebarPadding() });
       }
     }
   }
