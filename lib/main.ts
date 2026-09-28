@@ -174,12 +174,42 @@ export const main = () => {
       router.resolve();
       postHashToParent();
 
-      window.setInterval(function () {
+      const refresh = function () {
         update().then(function (fresh) {
           const nd = fresh as ObjectsLinksAndNodes;
           gui.setData(nd);
           router.setData(nd);
         });
+      };
+
+      // Lokaler Zusatz: ein Tab, der lange im Hintergrund liegt, laedt nicht
+      // mehr jede Minute neu. Jede Aktualisierung legt einige zehn MB an und
+      // gibt sie wieder frei; Firefox gibt solchen Speicher in Hintergrund-Tabs
+      // teils nicht an das System zurueck (Bugzilla 2070900), ueber Stunden
+      // wurden daraus viele GB. Beim Zurueckkehren wird sofort nachgeladen.
+      const pauseMs = (config.pauseHiddenAfterMinutes ?? 0) * 60000;
+      let hiddenSince = document.hidden ? Date.now() : 0;
+      let skipped = false;
+      if (pauseMs > 0) {
+        document.addEventListener("visibilitychange", function () {
+          if (document.hidden) {
+            hiddenSince = Date.now();
+          } else {
+            hiddenSince = 0;
+            if (skipped) {
+              skipped = false;
+              refresh();
+            }
+          }
+        });
+      }
+
+      window.setInterval(function () {
+        if (pauseMs > 0 && document.hidden && hiddenSince && Date.now() - hiddenSince >= pauseMs) {
+          skipped = true;
+          return;
+        }
+        refresh();
       }, 60000);
     })
     .catch(function (e: unknown) {

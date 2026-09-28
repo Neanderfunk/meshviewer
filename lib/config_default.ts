@@ -282,6 +282,10 @@ export interface Config {
   devicePicturesLicense: string;
   geo?: Geo[];
   fixedCenter?: LatLngBoundsExpression;
+  // Lokaler Zusatz: nach so vielen Minuten im Hintergrund (Tab nicht
+  // sichtbar) nicht mehr jede Minute neu laden; beim Zurueckkehren sofort
+  // einmal. Ohne den Schluessel laedt die Karte immer, wie im Original.
+  pauseHiddenAfterMinutes?: number;
 }
 
 export const config: Config = {
