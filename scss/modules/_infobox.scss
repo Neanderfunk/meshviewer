@@ -65,3 +65,28 @@
     opacity: 1;
   }
 }
+
+// Lokaler Zusatz (Neanderfunk): Kopierknopf hinter jeder IP-Adresse, klein
+// und blass wie das Zahnrad; nach dem Kopieren kurz gruen
+.infobox button.ip-copy {
+  background: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-size: 0.85em;
+  height: auto;
+  line-height: 1;
+  margin-left: 0.4em;
+  opacity: 0.35;
+  vertical-align: baseline;
+  width: auto;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+
+  &.copied {
+    color: variables.$color-new;
+    opacity: 1;
+  }
+}

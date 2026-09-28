@@ -67,6 +67,45 @@ export interface Node {
   autoupdater: Autoupdater;
 }
 
+// Lokaler Zusatz: kleiner Knopf zum Kopieren hinter jeder Adresse. Wer die
+// Adresse mit der Maus markierte, bekam den Tabulator zwischen den
+// Tabellenzellen mit in die Zwischenablage.
+function copyText(text: string, button: HTMLElement) {
+  const done = () => {
+    button.classList.add("copied");
+    setTimeout(() => button.classList.remove("copied"), 1500);
+  };
+  const fallback = () => {
+    const field = document.createElement("textarea");
+    field.value = text;
+    field.style.position = "fixed";
+    field.style.opacity = "0";
+    document.body.appendChild(field);
+    field.select();
+    try {
+      if (document.execCommand("copy")) done();
+    } catch (err) {
+      console.warn(err);
+    }
+    field.remove();
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text).then(done, fallback);
+  } else {
+    fallback();
+  }
+}
+
+function copyButton(text: string) {
+  return h("button.ion-clipboard.ip-copy", {
+    props: { type: "button", title: _.t("location.copy") },
+    attrs: { "aria-label": _.t("location.copy") + " " + text },
+    on: {
+      click: (e: Event) => copyText(text, e.currentTarget as HTMLElement),
+    },
+  });
+}
+
 function showBar(value: string, width: number, warning: boolean) {
   return h("span", { props: { className: "bar" + (warning ? " warning" : "") } }, [
     h("span", {
@@ -219,6 +258,9 @@ const self = {
         // Bracket notation is only valid for IPv6 literals; IPv4 must stay unbracketed
         const host = ip.indexOf(":") !== -1 ? "[" + ip + "]" : ip;
         parts.push(h("a", { props: { href: "http://" + host + "/", target: "_blank" } }, ip));
+      }
+      if (typeof window !== "undefined" && window.config?.ipCopyButton) {
+        parts.push(copyButton(ip));
       }
     });
     return h("td", parts);

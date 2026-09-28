@@ -286,6 +286,8 @@ export interface Config {
   // sichtbar) nicht mehr jede Minute neu laden; beim Zurueckkehren sofort
   // einmal. Ohne den Schluessel laedt die Karte immer, wie im Original.
   pauseHiddenAfterMinutes?: number;
+  // Lokaler Zusatz: Kopierknopf hinter jeder IP-Adresse im Knotenfenster
+  ipCopyButton?: boolean;
 }
 
 export const config: Config = {

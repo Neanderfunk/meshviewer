@@ -54,6 +54,22 @@ describe("node utils with sparse nodes", () => {
     ]);
   });
 
+  it("adds a copy button after every address when ipCopyButton is set", () => {
+    vi.stubGlobal("window", { config: { ipCopyButton: true } });
+    const node = { addresses: ["2001:db8::1", "fe80::1"] } as any;
+
+    const parts = (nodef.showIPs(node) as any).args[1];
+
+    expect(parts.map((p: any) => (typeof p === "string" ? p : p.args[0]))).toEqual([
+      "a",
+      "button.ion-clipboard.ip-copy",
+      "br",
+      "fe80::1",
+      "button.ion-clipboard.ip-copy",
+    ]);
+    vi.unstubAllGlobals();
+  });
+
   it("returns undefined for null optional node attributes from live data", () => {
     const nullNode = {
       node_id: "1450",
