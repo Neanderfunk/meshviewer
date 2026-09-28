@@ -303,7 +303,19 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
       } else if (savedView) {
         map.setView(savedView.center, savedView.zoom);
       } else if (config.fixedCenter) {
-        map.fitBounds(config.fixedCenter, { maxZoom: config.nodeZoom, paddingTopLeft: sidebarPadding() });
+        const padding = sidebarPadding();
+        const offset = config.fixedCenterZoomOffset ?? 0;
+        if (offset) {
+          // Lokaler Zusatz: um offset Stufen enger als der eingepasste
+          // Ausschnitt, die Mitte des Ausschnitts bleibt die Mitte der
+          // sichtbaren Flaeche rechts der Seitenleiste
+          const bounds = L.latLngBounds(config.fixedCenter as L.LatLngExpression[]);
+          const zoom = Math.min(map.getBoundsZoom(bounds, false, L.point(padding)) + offset, config.nodeZoom);
+          const center = map.project(bounds.getCenter(), zoom).subtract(L.point(padding).divideBy(2));
+          map.setView(map.unproject(center, zoom), zoom);
+        } else {
+          map.fitBounds(config.fixedCenter, { maxZoom: config.nodeZoom, paddingTopLeft: padding });
+        }
       }
     }
   }

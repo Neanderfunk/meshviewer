@@ -287,6 +287,9 @@ export interface Config {
   // sichtbar) nicht mehr jede Minute neu laden; beim Zurueckkehren sofort
   // einmal. Ohne den Schluessel laedt die Karte immer, wie im Original.
   pauseHiddenAfterMinutes?: number;
+  // Lokaler Zusatz: der Startausschnitt (fixedCenter) um so viele Stufen
+  // enger als eingepasst; Knoten am Rand erreicht man per Schieben
+  fixedCenterZoomOffset?: number;
   // Lokaler Zusatz: Kopierknopf hinter jeder IP-Adresse im Knotenfenster
   ipCopyButton?: boolean;
 }
