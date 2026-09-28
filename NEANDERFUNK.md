@@ -21,6 +21,7 @@ besteht die Tests des Projekts.
 | Zahnrad zum Service-Menü | `serviceLink`: kleines Zahnrad neben dem Knotennamen; Service Worker lässt die Anmeldung durch |
 | Airtime je Funkband | `airtime`: Zeilen "Airtime Kanal 9" mit Balken wie bei HopGlass (empfangen, gesendet, andere), aus der Prometheus-API |
 | Startausschnitt neben der Seitenleiste | `fixedCenter` wird rechts der offenen Seitenleiste eingepasst, nicht unter ihr |
+| Pause im Hintergrund | `pauseHiddenAfterMinutes`: ein Tab, der so lange nicht sichtbar ist, lädt nicht mehr jede Minute neu; beim Zurückkehren sofort |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
 Zweig wie das Original.
