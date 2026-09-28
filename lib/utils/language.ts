@@ -61,7 +61,7 @@ export const Language = function () {
           LLLL: "dddd, D. MMMM YYYY HH:mm",
         },
         calendar: translationJson.momentjs.calendar,
-        relativeTime: translationJson.momentjs.relativeTime,
+        relativeTime: relativeTimeSpec(translationJson.momentjs),
       });
     }
   }
@@ -80,3 +80,25 @@ export const Language = function () {
     languageSelect,
   };
 };
+
+// Lokaler Zusatz: Sprachen mit Faellen brauchen je nach Verwendung andere
+// Formen. "vor 3 Tagen" (mit Zusatz, Dativ) und die Laufzeit "3 Tage" (ohne
+// Zusatz, fromNow(true)) kamen bisher aus derselben Liste, also stand dort
+// "3 Tagen" und "einem Tag". Eine Sprachdatei kann jetzt zusaetzlich
+// relativeTimeWithoutSuffix mitbringen; fehlt sie, bleibt alles wie bisher.
+type RelativeTimeFn = (n: number, withoutSuffix: boolean) => string;
+export function relativeTimeSpec(momentjs: {
+  relativeTime: Record<string, string>;
+  relativeTimeWithoutSuffix?: Record<string, string>;
+}): Record<string, string | RelativeTimeFn> {
+  const mit = momentjs.relativeTime;
+  const ohne = momentjs.relativeTimeWithoutSuffix;
+  if (!ohne) return mit;
+  const spec: Record<string, string | RelativeTimeFn> = { ...mit };
+  for (const key of Object.keys(ohne)) {
+    if (key === "future" || key === "past" || !(key in mit)) continue;
+    spec[key] = (n: number, withoutSuffix: boolean) =>
+      (withoutSuffix ? ohne[key]! : mit[key]!).replace("%d", String(n));
+  }
+  return spec;
+}

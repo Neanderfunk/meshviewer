@@ -102,6 +102,19 @@
       "MM": "%d Monaten",
       "y": "einem Jahr",
       "yy": "%d Jahren"
+    },
+    "relativeTimeWithoutSuffix": {
+      "s": "ein paar Sekunden",
+      "m": "1 Minute",
+      "mm": "%d Minuten",
+      "h": "1 Stunde",
+      "hh": "%d Stunden",
+      "d": "1 Tag",
+      "dd": "%d Tage",
+      "M": "1 Monat",
+      "MM": "%d Monate",
+      "y": "1 Jahr",
+      "yy": "%d Jahre"
     }
   },
   "yes": "ja",
