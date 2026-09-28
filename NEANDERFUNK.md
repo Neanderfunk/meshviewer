@@ -3,8 +3,8 @@
 Dieser Fork von [freifunk/meshviewer](https://github.com/freifunk/meshviewer)
 liefert die Karte `neander.map.freifunk.space` von Freifunk Neanderland aus.
 Der Zweig `main` folgt unverändert dem Original, unsere Änderungen liegen im
-Zweig `neanderfunk`, je Funktion ein Commit auf dem Upstream-Stand `6c68e3d`
-(18.09.2026). Jeder Commit besteht die Typprüfung für sich; der Endstand
+Zweig `neanderfunk`, je Funktion ein Commit, ursprünglich auf dem Upstream-Stand `6c68e3d`
+(18.09.2026), seitdem per Merge nachgezogen (zuletzt `df76ed7`, 26.09.2026). Jeder Commit besteht die Typprüfung für sich; der Endstand
 besteht die Tests des Projekts.
 
 | Commit | Was |
@@ -30,10 +30,17 @@ Zweig wie das Original.
 Lizenz wie das Original: AGPL-3.0. Wer die Karte benutzt, findet hier den
 Quelltext der Fassung, die sie ausliefert.
 
-Aktualisieren auf einen neuen Upstream-Stand:
+Aktualisieren auf einen neuen Upstream-Stand, per Merge, nicht per Rebase:
+auf die Commits dieses Zweigs verweisen veröffentlichte Links (etwa aus
+Forenbeiträgen), ein Rebase würde ihre IDs ändern und einen Force-Push
+brauchen. Bis 25.09.2026 wurde rebased; seit 28.09.2026 (Upstream `df76ed7`)
+wird zusammengeführt.
 
 ```bash
 git fetch upstream
-git rebase <neuer-upstream-commit> neanderfunk
-npx tsc --noEmit && npx vitest run
+git merge upstream/main
+npm ci && npx tsc --noEmit && npx vitest run && npx vite build
 ```
+
+Welche Commits unsere sind, zeigt dann
+`git log --no-merges --first-parent 6c68e3d..neanderfunk`.
