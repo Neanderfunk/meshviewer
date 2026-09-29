@@ -4,7 +4,7 @@ import * as helper from "../utils/helper.js";
 import { LinkInfo } from "../config_default.js";
 import { ObjectsLinksAndNodes } from "../datadistributor.js";
 import { Link as LinkData } from "../utils/node.js";
-import { createChartVNode } from "./chart.js";
+import { createChartsVNode } from "./chart.js";
 
 const patch = init([classModule, propsModule, styleModule, eventListenersModule]);
 
@@ -101,15 +101,15 @@ export const Link = function (el: HTMLElement, linkData: [LinkData, ...LinkData[
       ]);
 
       // Charts
+      // Lokaler Zusatz: dieselbe Diagrammleiste wie im Knotenfenster, mit
+      // umschaltbarem Zeitraum fuer alle Diagramme der Verbindung
       if (config.linkCharts.length) {
-        const charts = config.linkCharts.flatMap((chart) => [
-          h("h4", chart.name),
-          createChartVNode(chart, {
+        newContainer.children!.push(
+          createChartsVNode(config.linkCharts, {
             source: linkData[0].source.node_id,
             target: linkData[0].target.node_id,
           }),
-        ]);
-        newContainer.children!.push(h("div", charts));
+        );
       }
 
       containerVnode = patch(containerVnode ?? container, newContainer);
