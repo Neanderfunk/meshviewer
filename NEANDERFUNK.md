@@ -12,6 +12,7 @@ besteht die Tests des Projekts.
 | Knotenbeschriftung | Saum, Schrift und Abstand einstellbar, je Thema |
 | Diagramme direkt | `prometheus-direct`: Zeitreihen ohne Grafana als Übersetzer |
 | Zeiträume | Zeitraum aller Diagramme eines Knotens umschaltbar |
+| Zeiträume im Verbindungsfenster | `linkCharts` mit derselben Zeitraumleiste wie im Knotenfenster |
 | Service Worker | liefert unter `/grafana/` und `/nf/` nicht die Karte aus |
 | Ganzzahlige Achsen | keine halben Clients mehr an der Achse |
 | Wertezeilen | Zeilen im Knotenfenster aus den Zeitreihen, etwa die Funkkanäle |
