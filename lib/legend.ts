@@ -1,3 +1,4 @@
+import moment, { Moment } from "moment";
 import { _ } from "./utils/language.js";
 import * as helper from "./utils/helper.js";
 import { Language } from "./utils/language.js";
@@ -8,6 +9,21 @@ import { CanRender } from "./container.js";
 export const Legend = function (language: ReturnType<typeof Language>): CanSetData & CanRender {
   const stats = document.createTextNode("");
   const timestamp = document.createTextNode("");
+  // Zeile samt Umbruch, damit sie sich als Ganzes ausblenden laesst
+  const lastUpdate = document.createElement("span");
+  lastUpdate.className = "last-update";
+  lastUpdate.append(document.createElement("br"), timestamp);
+  let ts: Moment | undefined;
+
+  // Mit lastUpdateAfterMinutes nur sichtbar, wenn die Daten veraltet sind.
+  // Laedt die Karte nichts mehr, kommt kein setData; daher auch per Takt.
+  function updateTimestamp() {
+    timestamp.textContent = _.t("sidebar.lastUpdate") + " " + (ts ? ts.fromNow() : "");
+    const minutes = window.config.lastUpdateAfterMinutes;
+    if (minutes !== undefined) {
+      lastUpdate.hidden = !ts || moment().diff(ts, "minutes") < minutes;
+    }
+  }
 
   return {
     setData(data: ObjectsLinksAndNodes) {
@@ -34,8 +50,8 @@ export const Legend = function (language: ReturnType<typeof Language>): CanSetDa
         " " +
         _.t("sidebar.gateway", { smart_count: totalGateways });
 
-      const ts = data.timestamp;
-      timestamp.textContent = _.t("sidebar.lastUpdate") + " " + (ts ? ts.fromNow() : "");
+      ts = data.timestamp;
+      updateTimestamp();
     },
 
     render(el: HTMLElement) {
@@ -50,8 +66,11 @@ export const Legend = function (language: ReturnType<typeof Language>): CanSetDa
       p.classList.add("legend");
 
       p.appendChild(stats);
-      p.appendChild(document.createElement("br"));
-      p.appendChild(timestamp);
+      p.appendChild(lastUpdate);
+      if (config.lastUpdateAfterMinutes !== undefined) {
+        updateTimestamp();
+        window.setInterval(updateTimestamp, 60_000);
+      }
 
       if (config.linkList) {
         p.appendChild(document.createElement("br"));

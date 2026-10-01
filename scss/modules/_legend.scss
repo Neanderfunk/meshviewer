@@ -28,6 +28,12 @@ header {
     &:not(:first-child) {
       margin-left: 1em;
     }
+
+    // Lokaler Zusatz: die Zeile "Letzte Aktualisierung" ist ein span samt
+    // Umbruch und soll nicht eingerueckt werden
+    &.last-update {
+      margin-left: 0;
+    }
   }
 }
 

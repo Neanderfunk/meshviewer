@@ -25,6 +25,7 @@ besteht die Tests des Projekts.
 | Startausschnitt enger | `fixedCenterZoomOffset`: so viele Zoomstufen enger als eingepasst, Mitte bleibt neben der Seitenleiste |
 | Pause im Hintergrund | `pauseHiddenAfterMinutes`: ein Tab, der so lange nicht sichtbar ist, lädt nicht mehr jede Minute neu; beim Zurückkehren sofort |
 | Kopierknopf hinter IP-Adressen | `ipCopyButton`: kopiert genau die Adresse, ohne den Tabulator, den das Markieren mitnimmt |
+| Letzte Aktualisierung nur bei alten Daten | `lastUpdateAfterMinutes`: die Zeile erscheint erst, wenn die Daten älter sind als so viele Minuten |
 | Laufzeit im richtigen Fall | `momentjs.relativeTimeWithoutSuffix` in der Sprachdatei: "3 Tage" statt "3 Tagen", de.json befüllt |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
