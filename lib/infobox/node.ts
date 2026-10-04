@@ -7,6 +7,7 @@ import nodef, { Neighbour, Node as NodeData, NodeId } from "../utils/node.js";
 import { NodeInfo } from "../config_default.js";
 import { createChartsVNode, createNodeValueVNode } from "./chart.js";
 import { createAirtimeRows } from "./airtime.js";
+import { markieren } from "./overrides.js";
 import { ObjectsLinksAndNodes } from "../datadistributor.js";
 
 // `config.nodeAttr.value` may be either a function or a string. When it is a
@@ -200,6 +201,24 @@ export function Node(el: HTMLElement, node: NodeData, linkScale: (t: any) => any
               rel: "nofollow",
             },
             attrs: { "aria-label": config.serviceLink.title },
+            hook: config.serviceOverrides
+              ? {
+                  insert: (vnode) =>
+                    markieren(
+                      vnode.elm as HTMLElement,
+                      config.serviceOverrides!,
+                      node.node_id,
+                      config.serviceLink!.title,
+                    ),
+                  postpatch: (_alt, vnode) =>
+                    markieren(
+                      vnode.elm as HTMLElement,
+                      config.serviceOverrides!,
+                      node.node_id,
+                      config.serviceLink!.title,
+                    ),
+                }
+              : undefined,
           }),
         );
       }

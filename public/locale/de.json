@@ -41,7 +41,13 @@
     "new": "Neue Knoten",
     "missing": "Verschwundene Knoten",
     "chartNoData": "%{name}: Keine Daten",
-    "chartError": "%{name}: Fehler beim Laden des Diagramms"
+    "chartError": "%{name}: Fehler beim Laden des Diagramms",
+    "overrideBy": "per Override",
+    "override": {
+      "ort": "Ort",
+      "ort-weg": "nicht auf der Landkarte",
+      "name": "Name"
+    }
   },
   "location": {
     "location": "Standort",

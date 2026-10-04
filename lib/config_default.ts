@@ -158,6 +158,9 @@ export interface Config {
   // Lokaler Zusatz (Neanderfunk): kleines Zahnrad neben dem Knotennamen, das
   // auf eine Service-Seite fuehrt; {NODE_ID} wird ersetzt
   serviceLink?: Link;
+  // Lokaler Zusatz (Neanderfunk): URL einer Liste {node_id: ["ort" |
+  // "ort-weg" | "name"]}; Knoten darin bekommen ein gelbes Zahnrad
+  serviceOverrides?: string;
   // Lokaler Zusatz (Neanderfunk): Links oben in der Statistik
   statisticsLinks?: Link[];
   reverseGeocodingApi: string;

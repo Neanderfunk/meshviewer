@@ -20,6 +20,7 @@ besteht die Tests des Projekts.
 | Koordinaten in einer Zeile | Standortwahl bietet "Breite, Länge" zum Kopieren, etwa für den UniFi-Controller |
 | Links oben in der Statistik | `statisticsLinks`: etwa zur Gesamtsicht in Grafana |
 | Zahnrad zum Service-Menü | `serviceLink`: kleines Zahnrad neben dem Knotennamen; Service Worker lässt die Anmeldung durch |
+| Override am Zahnrad | `serviceOverrides`: URL einer Liste {node_id: ["ort", "ort-weg", "name"]}; das Zahnrad wird gelb, der Tooltip nennt, was überschrieben ist |
 | Airtime je Funkband | `airtime`: Zeilen "Airtime Kanal 9" mit Balken wie bei HopGlass (empfangen, gesendet, andere), aus der Prometheus-API |
 | Startausschnitt neben der Seitenleiste | `fixedCenter` wird rechts der offenen Seitenleiste eingepasst, nicht unter ihr |
 | Startausschnitt enger | `fixedCenterZoomOffset`: so viele Zoomstufen enger als eingepasst, Mitte bleibt neben der Seitenleiste |

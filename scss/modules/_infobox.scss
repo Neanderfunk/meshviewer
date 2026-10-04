@@ -64,6 +64,12 @@
   &:focus {
     opacity: 1;
   }
+
+  // Name oder Ort per Override: gelb und voll sichtbar
+  &.override {
+    color: #e6a800;
+    opacity: 1;
+  }
 }
 
 // Lokaler Zusatz (Neanderfunk): Kopierknopf hinter jeder IP-Adresse, klein
