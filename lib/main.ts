@@ -145,26 +145,38 @@ export const main = () => {
 
   language.init(router);
 
-  function update() {
-    return Promise.all(config.dataPath.map(helper.getJSON)).then(handleData);
+  function fetchData() {
+    return Promise.all(config.dataPath.map(helper.getJSON));
   }
 
-  update()
-    .then(function (nodesData) {
-      return new Promise(function (resolve, reject) {
-        let count = 0;
-        function waitForLanguage() {
-          if (Object.keys(_.phrases ?? {}).length > 0) {
-            resolve(nodesData);
-          } else if (count > 500) {
-            reject(new Error("translation not loaded after 10 seconds"));
-          } else {
-            setTimeout(waitForLanguage, 20);
-          }
-          count++;
-        }
-        waitForLanguage();
-      });
+  function update() {
+    return fetchData().then(handleData);
+  }
+
+  // Lokaler Zusatz: die Daten erst verarbeiten, wenn die Sprache geladen ist.
+  // handleData legt lastseen und firstseen als moment-Objekte an, und die
+  // behalten die Sprache, die beim Anlegen galt. Kamen die Daten vor der
+  // Sprachdatei, stand bis zum ersten Nachladen "4 minutes ago" auf der
+  // deutschen Karte (gesehen 04.10.2026 mit englischem Browser). Geladen
+  // wird weiter parallel.
+  const languageLoaded = new Promise<void>(function (resolve, reject) {
+    let count = 0;
+    function waitForLanguage() {
+      if (Object.keys(_.phrases ?? {}).length > 0) {
+        resolve();
+      } else if (count > 500) {
+        reject(new Error("translation not loaded after 10 seconds"));
+      } else {
+        setTimeout(waitForLanguage, 20);
+      }
+      count++;
+    }
+    waitForLanguage();
+  });
+
+  Promise.all([fetchData(), languageLoaded])
+    .then(function ([data]) {
+      return handleData(data);
     })
     .then(function (nodesData) {
       const data = nodesData as ObjectsLinksAndNodes;

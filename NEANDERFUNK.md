@@ -28,6 +28,7 @@ besteht die Tests des Projekts.
 | Kopierknopf hinter IP-Adressen | `ipCopyButton`: kopiert genau die Adresse, ohne den Tabulator, den das Markieren mitnimmt |
 | Letzte Aktualisierung nur bei alten Daten | `lastUpdateAfterMinutes`: die Zeile erscheint erst, wenn die Daten älter sind als so viele Minuten |
 | Laufzeit im richtigen Fall | `momentjs.relativeTimeWithoutSuffix` in der Sprachdatei: "3 Tage" statt "3 Tagen", de.json befüllt |
+| Sprache vor den Daten | Kartendaten erst verarbeiten, wenn die Sprachdatei geladen ist; sonst blieben "zuletzt gesehen" und "erstmals gesehen" bis zum ersten Nachladen englisch ("4 minutes ago") |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
 Zweig wie das Original.
