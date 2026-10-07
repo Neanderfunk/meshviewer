@@ -295,6 +295,11 @@ export interface Config {
   fixedCenterZoomOffset?: number;
   // Lokaler Zusatz: Kopierknopf hinter jeder IP-Adresse im Knotenfenster
   ipCopyButton?: boolean;
+  // Lokaler Zusatz: Kabel-Links ("other") ab diesem TQ auf beiden Seiten in
+  // otherLinkColor statt in der TQ-Farbe. Upstream fest 0.99; ueber Kabel
+  // meldet batman oft 0.98 (ein verlorenes OGM), dann wurde der Link gruen
+  // wie ein Funklink.
+  otherLinkMinTq?: number;
   // Lokaler Zusatz: "Letzte Aktualisierung" erst zeigen, wenn die Daten
   // aelter als so viele Minuten sind; frische Daten brauchen die Zeile nicht
   lastUpdateAfterMinutes?: number;

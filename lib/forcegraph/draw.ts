@@ -125,7 +125,9 @@ const self = {
     } else if (link.o.type.indexOf("other") === 0) {
       ctx.globalAlpha = 1;
       ctx.lineWidth = 3.5;
-      if (link.o.source_tq >= 0.99 && link.o.target_tq >= 0.99) {
+      // Lokaler Zusatz: Schwelle einstellbar (otherLinkMinTq), Vorgabe wie upstream
+      const minTq = config.otherLinkMinTq ?? 0.99;
+      if (link.o.source_tq >= minTq && link.o.target_tq >= minTq) {
         link.color = config.forceGraph.otherLinkColor;
         link.color_to = config.forceGraph.otherLinkColor;
       }

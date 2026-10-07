@@ -29,6 +29,7 @@ besteht die Tests des Projekts.
 | Letzte Aktualisierung nur bei alten Daten | `lastUpdateAfterMinutes`: die Zeile erscheint erst, wenn die Daten älter sind als so viele Minuten |
 | Laufzeit im richtigen Fall | `momentjs.relativeTimeWithoutSuffix` in der Sprachdatei: "3 Tage" statt "3 Tagen", de.json befüllt |
 | Sprache vor den Daten | Kartendaten erst verarbeiten, wenn die Sprachdatei geladen ist; sonst blieben "zuletzt gesehen" und "erstmals gesehen" bis zum ersten Nachladen englisch ("4 minutes ago") |
+| Kabel-Links blau ab einstellbarem TQ | `otherLinkMinTq`: Links vom Typ "other" erscheinen ab diesem TQ auf beiden Seiten in `otherLinkColor`; upstream fest 0.99, dann wurde ein Kabel-Link mit 0.98 grün wie Funk |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
 Zweig wie das Original.
