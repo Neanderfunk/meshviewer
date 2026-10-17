@@ -290,6 +290,9 @@ export interface Config {
   // sichtbar) nicht mehr jede Minute neu laden; beim Zurueckkehren sofort
   // einmal. Ohne den Schluessel laedt die Karte immer, wie im Original.
   pauseHiddenAfterMinutes?: number;
+  // Lokaler Zusatz: die Pause nur in Gecko-Browsern (Firefox und
+  // Abkoemmlinge), deren Speicherverwaltung den Anlass gab
+  pauseHiddenGeckoOnly?: boolean;
   // Lokaler Zusatz: der Startausschnitt (fixedCenter) um so viele Stufen
   // enger als eingepasst; Knoten am Rand erreicht man per Schieben
   fixedCenterZoomOffset?: number;

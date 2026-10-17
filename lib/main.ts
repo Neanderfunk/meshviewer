@@ -199,7 +199,12 @@ export const main = () => {
       // gibt sie wieder frei; Firefox gibt solchen Speicher in Hintergrund-Tabs
       // teils nicht an das System zurueck (Bugzilla 2070900), ueber Stunden
       // wurden daraus viele GB. Beim Zurueckkehren wird sofort nachgeladen.
-      const pauseMs = (config.pauseHiddenAfterMinutes ?? 0) * 60000;
+      // Mit pauseHiddenGeckoOnly nur in Gecko (Firefox und Abkoemmlinge wie
+      // LibreWolf, Waterfox, Tor Browser): deren UA traegt "Gecko/<Datum>",
+      // Chromium und Safari nur "like Gecko". Dazu die Gecko-Eigenschaft
+      // MozAppearance, falls ein Abkoemmling die Kennung verstellt.
+      const gecko = /\bGecko\/\d/.test(navigator.userAgent) || "MozAppearance" in document.documentElement.style;
+      const pauseMs = config.pauseHiddenGeckoOnly && !gecko ? 0 : (config.pauseHiddenAfterMinutes ?? 0) * 60000;
       let hiddenSince = document.hidden ? Date.now() : 0;
       let skipped = false;
       if (pauseMs > 0) {

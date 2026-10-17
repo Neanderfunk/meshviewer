@@ -24,7 +24,7 @@ besteht die Tests des Projekts.
 | Airtime je Funkband | `airtime`: Zeilen "Airtime Kanal 9" mit Balken wie bei HopGlass (empfangen, gesendet, andere), aus der Prometheus-API |
 | Startausschnitt neben der Seitenleiste | `fixedCenter` wird rechts der offenen Seitenleiste eingepasst, nicht unter ihr |
 | Startausschnitt enger | `fixedCenterZoomOffset`: so viele Zoomstufen enger als eingepasst, Mitte bleibt neben der Seitenleiste |
-| Pause im Hintergrund | `pauseHiddenAfterMinutes`: ein Tab, der so lange nicht sichtbar ist, lädt nicht mehr jede Minute neu; beim Zurückkehren sofort |
+| Pause im Hintergrund | `pauseHiddenAfterMinutes`: ein Tab, der so lange nicht sichtbar ist, lädt nicht mehr jede Minute neu; beim Zurückkehren sofort. Mit `pauseHiddenGeckoOnly` nur in Firefox und seinen Abkömmlingen |
 | Kopierknopf hinter IP-Adressen | `ipCopyButton`: kopiert genau die Adresse, ohne den Tabulator, den das Markieren mitnimmt |
 | Letzte Aktualisierung nur bei alten Daten | `lastUpdateAfterMinutes`: die Zeile erscheint erst, wenn die Daten älter sind als so viele Minuten |
 | Laufzeit im richtigen Fall | `momentjs.relativeTimeWithoutSuffix` in der Sprachdatei: "3 Tage" statt "3 Tagen", de.json befüllt |
