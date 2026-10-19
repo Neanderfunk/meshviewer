@@ -235,6 +235,10 @@ export interface Config {
     otherLinkColor: string;
     // Abstossung zwischen Knoten (d3 forceManyBody, Standard -30)
     charge?: number;
+    // Reichweite der Abstossung (Standard unbegrenzt)
+    chargeDistanceMax?: number;
+    // Zug zur Mitte, forceX/forceY (Standard 0.02)
+    centerStrength?: number;
     // Anteil der Geschwindigkeit, der je Tick verloren geht (Standard 0.15)
     velocityDecay?: number;
     // Zug der VPN-Links zum Gateway (Standard 0.02)

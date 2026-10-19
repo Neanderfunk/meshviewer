@@ -178,9 +178,15 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
   force = d3Force
     .forceSimulation()
     .force("link", forceLink)
-    .force("charge", d3Force.forceManyBody().strength(window.config.forceGraph.charge ?? -30))
-    .force("x", d3Force.forceX().strength(0.02))
-    .force("y", d3Force.forceY().strength(0.02))
+    .force(
+      "charge",
+      d3Force
+        .forceManyBody()
+        .strength(window.config.forceGraph.charge ?? -30)
+        .distanceMax(window.config.forceGraph.chargeDistanceMax ?? Infinity),
+    )
+    .force("x", d3Force.forceX().strength(window.config.forceGraph.centerStrength ?? 0.02))
+    .force("y", d3Force.forceY().strength(window.config.forceGraph.centerStrength ?? 0.02))
     .force("collide", d3Force.forceCollide())
     .on("tick", redraw)
     .alphaDecay(0.025);
