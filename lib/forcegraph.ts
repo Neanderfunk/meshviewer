@@ -160,7 +160,7 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
     .strength(function (node) {
       // @ts-expect-error d3 node
       if (node.o.type.indexOf("vpn") === 0) {
-        return 0.02;
+        return window.config.forceGraph.vpnLinkStrength ?? 0.02;
       }
       // @ts-expect-error d3 node
       return Math.max(0.5, node.o.source_tq);
@@ -268,6 +268,23 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
         },
       ];
     });
+
+    // Lokaler Zusatz: Gateways (Supernodes) beim ersten Auftauchen auf einen
+    // Kreis um das Netz legen, nach Domain sortiert, damit sich jede Domain
+    // in ihrem Abschnitt entfaltet (forceGraph.gatewaysOnRim).
+    if (window.config.forceGraph.gatewaysOnRim) {
+      const gateways = intNodes
+        .filter((node) => node.o.is_gateway)
+        .sort((a, b) => (a.o.domain ?? "").localeCompare(b.o.domain ?? "") || a.o.hostname.localeCompare(b.o.hostname));
+      const radius = Math.sqrt(intNodes.length / Math.PI) * 75 * 1.41;
+      gateways.forEach((node, i) => {
+        if (!Number.isFinite(node.x) || !Number.isFinite(node.y)) {
+          const angle = (2 * Math.PI * i) / gateways.length;
+          node.x = radius * Math.cos(angle);
+          node.y = radius * Math.sin(angle);
+        }
+      });
+    }
 
     force!.nodes(intNodes);
     forceLink.links!(intLinks);
