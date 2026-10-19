@@ -153,7 +153,7 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
     .distance(function (node) {
       // @ts-expect-error d3 node
       if (node.o.type.indexOf("vpn") === 0) {
-        return 0;
+        return window.config.forceGraph.vpnLinkDistance ?? 0;
       }
       return 75;
     })

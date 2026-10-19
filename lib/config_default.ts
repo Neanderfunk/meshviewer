@@ -243,6 +243,8 @@ export interface Config {
     velocityDecay?: number;
     // Zug der VPN-Links zum Gateway (Standard 0.02)
     vpnLinkStrength?: number;
+    // Laenge der VPN-Links (Standard 0, Mesh-Links 75)
+    vpnLinkDistance?: number;
     // Gateways beim Start auf einen Kreis um das Netz legen (Standard aus)
     gatewaysOnRim?: boolean;
   };
