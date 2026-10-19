@@ -35,6 +35,11 @@ function drawDetailNode(node: MapNode) {
       name = node.o.hostname;
     }
     ctx.textAlign = "center";
+    // Lokaler Zusatz: Schriftgroesse der Namen, sonst die Vorgabe des
+    // Canvas (10px sans-serif)
+    if (config.forceGraph.labelSize) {
+      ctx.font = `${config.forceGraph.labelSize}px sans-serif`;
+    }
     ctx.fillStyle = config.forceGraph.labelColor;
     ctx.fillText(name, node.x, node.y + 20);
   }

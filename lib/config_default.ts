@@ -245,6 +245,8 @@ export interface Config {
     vpnLinkStrength?: number;
     // Laenge der VPN-Links (Standard 0, Mesh-Links 75)
     vpnLinkDistance?: number;
+    // Schriftgroesse der Knotennamen in px (Standard 10, Vorgabe des Canvas)
+    labelSize?: number;
     // Gateways beim Start auf einen Kreis um das Netz legen (Standard aus)
     gatewaysOnRim?: boolean;
   };
