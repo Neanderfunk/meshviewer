@@ -178,7 +178,7 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
   force = d3Force
     .forceSimulation()
     .force("link", forceLink)
-    .force("charge", d3Force.forceManyBody())
+    .force("charge", d3Force.forceManyBody().strength(window.config.forceGraph.charge ?? -30))
     .force("x", d3Force.forceX().strength(0.02))
     .force("y", d3Force.forceY().strength(0.02))
     .force("collide", d3Force.forceCollide())
@@ -272,7 +272,10 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
     force!.nodes(intNodes);
     forceLink.links!(intLinks);
 
-    force!.alpha(initial).velocityDecay(0.15).restart();
+    force!
+      .alpha(initial)
+      .velocityDecay(window.config.forceGraph.velocityDecay ?? 0.15)
+      .restart();
     if (initial === 1.8) {
       initial = 0.5;
     }

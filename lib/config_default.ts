@@ -233,6 +233,10 @@ export interface Config {
     tqTo: string;
     zoomModifier: number;
     otherLinkColor: string;
+    // Abstossung zwischen Knoten (d3 forceManyBody, Standard -30)
+    charge?: number;
+    // Anteil der Geschwindigkeit, der je Tick verloren geht (Standard 0.15)
+    velocityDecay?: number;
   };
   locate: {
     outerCircle: {
