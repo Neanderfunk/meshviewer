@@ -247,6 +247,10 @@ export interface Config {
     vpnLinkDistance?: number;
     // Schriftgroesse der Knotennamen in px (Standard 10, Vorgabe des Canvas)
     labelSize?: number;
+    // Auch Offline-Knoten beschriften (Standard aus), in eigener Farbe
+    // (Standard nodeOfflineColor)
+    offlineLabels?: boolean;
+    offlineLabelColor?: string;
     // Gateways beim Start auf einen Kreis um das Netz legen (Standard aus)
     gatewaysOnRim?: boolean;
   };

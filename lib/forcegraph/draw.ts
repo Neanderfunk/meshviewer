@@ -26,9 +26,13 @@ let NODE_RADIUS = 15;
 let LINE_RADIUS = 12;
 
 function drawDetailNode(node: MapNode) {
-  if (transform.k > 1 && node.o.is_online) {
-    const config = window.config;
-    helper.positionClients(ctx, node, Math.PI, node.o, 15);
+  const config = window.config;
+  // Lokaler Zusatz: mit forceGraph.offlineLabels auch Offline-Knoten
+  // beschriften, in eigener Farbe
+  if (transform.k > 1 && (node.o.is_online || config.forceGraph.offlineLabels)) {
+    if (node.o.is_online) {
+      helper.positionClients(ctx, node, Math.PI, node.o, 15);
+    }
     ctx.beginPath();
     let name = node.o.node_id;
     if (node.o) {
@@ -40,7 +44,9 @@ function drawDetailNode(node: MapNode) {
     if (config.forceGraph.labelSize) {
       ctx.font = `${config.forceGraph.labelSize}px sans-serif`;
     }
-    ctx.fillStyle = config.forceGraph.labelColor;
+    ctx.fillStyle = node.o.is_online
+      ? config.forceGraph.labelColor
+      : (config.forceGraph.offlineLabelColor ?? config.forceGraph.nodeOfflineColor);
     ctx.fillText(name, node.x, node.y + 20);
   }
 }
