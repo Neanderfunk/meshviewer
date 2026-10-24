@@ -327,6 +327,10 @@ export interface Config {
   // gestrichelt, 5 und 6 GHz durchgezogen (braucht source_frequency/
   // target_frequency vom yanic-Fork); das Band steht ohnehin im Tooltip
   linkBandStyle?: boolean;
+  // Lokaler Zusatz: "(VPN-Uplink)" im Tooltip von Online-Knoten mit eigenem
+  // VPN-Link; die Hervorhebung selbst regeln die Stile icon["online.uplink"]
+  // und icon["new.uplink"]
+  uplinkTooltip?: boolean;
   // Lokaler Zusatz: "Letzte Aktualisierung" erst zeigen, wenn die Daten
   // aelter als so viele Minuten sind; frische Daten brauchen die Zeile nicht
   lastUpdateAfterMinutes?: number;

@@ -32,6 +32,7 @@ besteht die Tests des Projekts.
 | Sprache vor den Daten | Kartendaten erst verarbeiten, wenn die Sprachdatei geladen ist; sonst blieben "zuletzt gesehen" und "erstmals gesehen" bis zum ersten Nachladen englisch ("4 minutes ago") |
 | Kabel-Links blau ab einstellbarem TQ | `otherLinkMinTq`: Links vom Typ "other" erscheinen ab diesem TQ auf beiden Seiten in `otherLinkColor`; upstream fest 0.99, dann wurde ein Kabel-Link mit 0.98 grün wie Funk |
 | Band der WLAN-Links | aus `source_frequency`/`target_frequency` (yanic-Fork): Band im Tooltip der Linie, im Linkfenster (dazu Frequenz je Seite) und in der Nachbarliste; mit `linkBandStyle` 2.4 GHz gestrichelt auf Karte und Graph. Anregung: 4830.org (HopGlass) |
+| Uplink im Tooltip | `uplinkTooltip`: "(VPN-Uplink)" hinter dem Namen von Online-Knoten mit eigenem VPN-Link; die Darstellung des Markers bleibt bei `icon["online.uplink"]`/`icon["new.uplink"]`. Anregung: 4830.org |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
 Zweig wie das Original.
