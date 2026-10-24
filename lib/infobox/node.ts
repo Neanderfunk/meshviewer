@@ -103,7 +103,9 @@ export function Node(el: HTMLElement, node: NodeData, linkScale: (t: any) => any
       h("span", {
         props: {
           className: "icon ion-" + (connecting.link.type.indexOf("wifi") === 0 ? "wifi" : "share-alt"),
-          title: _.t(connecting.link.type),
+          title:
+            _.t(connecting.link.type) +
+            (helper.linkBand(connecting.link) ? " (" + helper.linkBand(connecting.link) + ")" : ""),
         },
       }),
     ];

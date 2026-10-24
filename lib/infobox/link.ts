@@ -50,7 +50,10 @@ export const Link = function (el: HTMLElement, linkData: [LinkData, ...LinkData[
 
       linkData.forEach(function (link) {
         children.push(
-          h("tr", { props: { className: "header" } }, [h("th", _.t("node.connectionType")), h("th", link.type)]),
+          h("tr", { props: { className: "header" } }, [
+            h("th", _.t("node.connectionType")),
+            h("th", helper.linkTypeLabel(link)),
+          ]),
         );
         helper.attributeEntry(
           children,
@@ -61,6 +64,14 @@ export const Link = function (el: HTMLElement, linkData: [LinkData, ...LinkData[
             helper.showTq(link.source_tq) + " - " + helper.showTq(link.target_tq),
           ),
         );
+        // Lokaler Zusatz: Frequenz je Seite, wenn mindestens eine gemeldet ist
+        if (link.source_frequency || link.target_frequency) {
+          helper.attributeEntry(
+            children,
+            "node.frequency",
+            (link.source_frequency || "?") + " - " + (link.target_frequency || "?") + " MHz",
+          );
+        }
 
         if (config.linkTypeInfos) {
           config.linkTypeInfos.forEach(function (linkTypeInfo) {

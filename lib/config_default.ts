@@ -323,6 +323,10 @@ export interface Config {
   // meldet batman oft 0.98 (ein verlorenes OGM), dann wurde der Link gruen
   // wie ein Funklink.
   otherLinkMinTq?: number;
+  // Lokaler Zusatz: WLAN-Links im 2.4-GHz-Band auf Karte und Graph
+  // gestrichelt, 5 und 6 GHz durchgezogen (braucht source_frequency/
+  // target_frequency vom yanic-Fork); das Band steht ohnehin im Tooltip
+  linkBandStyle?: boolean;
   // Lokaler Zusatz: "Letzte Aktualisierung" erst zeigen, wenn die Daten
   // aelter als so viele Minuten sind; frische Daten brauchen die Zeile nicht
   lastUpdateAfterMinutes?: number;

@@ -150,7 +150,10 @@ const self = {
     grd.addColorStop(0.45, link.color);
     grd.addColorStop(0.55, link.color_to);
     ctx.strokeStyle = grd;
+    // Lokaler Zusatz: 2.4 GHz gestrichelt (linkBandStyle)
+    ctx.setLineDash(helper.linkBandDashed(link.o) ? [6, 4] : []);
     ctx.stroke();
+    ctx.setLineDash([]);
     ctx.globalAlpha = 1;
   },
 

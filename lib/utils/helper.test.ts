@@ -12,7 +12,7 @@ vi.mock("./language.js", () => ({
   },
 }));
 
-import { mergeSpellingVariants } from "./helper.js";
+import { linkBand, linkBandDashed, linkTypeLabel, mergeSpellingVariants } from "./helper.js";
 
 describe("mergeSpellingVariants", () => {
   it("merges case variants and labels them with the most common spelling", () => {
@@ -56,5 +56,39 @@ describe("mergeSpellingVariants", () => {
     );
 
     expect(merged).toHaveLength(2);
+  });
+});
+
+// Lokaler Zusatz: Band eines WLAN-Links aus der Frequenz (Grenzfaelle wie im
+// Test von 4830.org, dazu 6 GHz)
+describe("linkBand", () => {
+  it("ordnet die Frequenz dem Band zu", () => {
+    const fall = (source_frequency?: number, target_frequency?: number) =>
+      linkBand({ source_frequency, target_frequency });
+    expect(fall(2412)).toBe("2.4 GHz");
+    expect(fall(2484)).toBe("2.4 GHz");
+    expect(fall(undefined, 2412)).toBe("2.4 GHz");
+    expect(fall(5180)).toBe("5 GHz");
+    expect(fall(5885)).toBe("5 GHz");
+    expect(fall(5955)).toBe("6 GHz");
+    expect(fall(undefined)).toBeUndefined();
+    expect(fall(0)).toBeUndefined();
+    expect(fall(2500)).toBeUndefined();
+    expect(fall(4900)).toBeUndefined();
+  });
+
+  it("haengt das Band an den Typ", () => {
+    expect(linkTypeLabel({ type: "wifi", source_frequency: 5180 })).toBe("wifi (5 GHz)");
+    expect(linkTypeLabel({ type: "wifi" })).toBe("wifi");
+    expect(linkTypeLabel({ type: "other", target_frequency: 0 })).toBe("other");
+  });
+
+  it("strichelt 2.4 GHz nur mit linkBandStyle", () => {
+    (globalThis as any).window = { config: { linkBandStyle: false } };
+    expect(linkBandDashed({ source_frequency: 2412 })).toBe(false);
+    (globalThis as any).window = { config: { linkBandStyle: true } };
+    expect(linkBandDashed({ source_frequency: 2412 })).toBe(true);
+    expect(linkBandDashed({ source_frequency: 5180 })).toBe(false);
+    expect(linkBandDashed({})).toBe(false);
   });
 });

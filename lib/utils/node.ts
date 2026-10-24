@@ -18,6 +18,10 @@ export interface Link {
   target_mac?: string; // Same as _addr
   source_tq: number;
   target_tq: number;
+  // Lokaler Zusatz: Frequenz der Schnittstelle je Seite in MHz (yanic-Fork,
+  // nur wenn der Knoten sie meldet)
+  source_frequency?: number;
+  target_frequency?: number;
   latlngs?: LatLng[];
 }
 

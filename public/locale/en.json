@@ -9,6 +9,7 @@
     "distance": "Distance",
     "connectionType": "Connection type",
     "tq": "Transmit quality",
+    "frequency": "Frequency",
     "lastOnline": "online, last message %{time} (%{date})",
     "lastOffline": "offline, last message %{time} (%{date})",
     "activated": "activated (%{branch})",

@@ -2,7 +2,7 @@ import { Moment } from "moment";
 import { h, VNode } from "snabbdom";
 import { Map as LeafletMap } from "leaflet";
 import { _ } from "./language.js";
-import { Node } from "./node.js";
+import { Link, Node } from "./node.js";
 import { LinkInfo } from "../config_default.js";
 
 export const get = function get(url: string) {
@@ -154,6 +154,37 @@ export const showDistance = function showDistance(data: { distance: number }) {
 export const showTq = function showTq(tq: number) {
   return (tq * 100).toFixed(0) + "%";
 };
+
+// Lokaler Zusatz: Band eines WLAN-Links aus der Frequenz der Schnittstellen
+// (source_frequency/target_frequency aus dem yanic-Fork, Gluon-Patch
+// respondd-wifi-frequency nach 4830.org). Ohne Angabe undefined.
+export function linkBand(link: Pick<Link, "source_frequency" | "target_frequency">): string | undefined {
+  const f = link.source_frequency || link.target_frequency;
+  if (!f) {
+    return undefined;
+  }
+  if (f >= 2400 && f < 2500) {
+    return "2.4 GHz";
+  }
+  if (f >= 5150 && f < 5925) {
+    return "5 GHz";
+  }
+  if (f >= 5925 && f < 7125) {
+    return "6 GHz";
+  }
+  return undefined;
+}
+
+// Lokaler Zusatz: Linktyp mit Band, etwa "wifi (5 GHz)"
+export function linkTypeLabel(link: Pick<Link, "type" | "source_frequency" | "target_frequency">): string {
+  const band = linkBand(link);
+  return band ? link.type + " (" + band + ")" : link.type;
+}
+
+// Lokaler Zusatz: 2.4 GHz gestrichelt, wenn linkBandStyle an ist
+export function linkBandDashed(link: Pick<Link, "source_frequency" | "target_frequency">): boolean {
+  return !!window.config.linkBandStyle && linkBand(link) === "2.4 GHz";
+}
 
 export function attributeEntry(children: VNode[], label: string, value: string | VNode) {
   if (value !== undefined) {
