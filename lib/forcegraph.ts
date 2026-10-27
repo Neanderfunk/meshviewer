@@ -277,11 +277,22 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
 
     // Lokaler Zusatz: Gateways (Supernodes) beim ersten Auftauchen auf einen
     // Kreis um das Netz legen, nach Domain sortiert, damit sich jede Domain
-    // in ihrem Abschnitt entfaltet (forceGraph.gatewaysOnRim).
+    // in ihrem Abschnitt entfaltet (forceGraph.gatewaysOnRim). Sortiert wird
+    // nach der Domainnummer im Code, damit "ffnefd23" und "dus-23_dusuks"
+    // nebeneinander landen, solange beide Schreibweisen vorkommen.
     if (window.config.forceGraph.gatewaysOnRim) {
+      const nummer = (domain?: string) => {
+        const treffer = /\d+/.exec(domain ?? "");
+        return treffer ? Number(treffer[0]) : Infinity;
+      };
       const gateways = intNodes
         .filter((node) => node.o.is_gateway)
-        .sort((a, b) => (a.o.domain ?? "").localeCompare(b.o.domain ?? "") || a.o.hostname.localeCompare(b.o.hostname));
+        .sort(
+          (a, b) =>
+            nummer(a.o.domain) - nummer(b.o.domain) ||
+            (a.o.domain ?? "").localeCompare(b.o.domain ?? "") ||
+            a.o.hostname.localeCompare(b.o.hostname),
+        );
       const radius = Math.sqrt(intNodes.length / Math.PI) * 75 * 1.41;
       gateways.forEach((node, i) => {
         if (!Number.isFinite(node.x) || !Number.isFinite(node.y)) {
