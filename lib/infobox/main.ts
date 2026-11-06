@@ -75,6 +75,10 @@ export const Main = function (
     },
 
     gotoLocation(locationData: TargetLocation) {
+      if (locationData.ohneLeiste) {
+        destroy();
+        return;
+      }
       create();
       location(el!, locationData);
     },

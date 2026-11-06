@@ -80,3 +80,55 @@ describe("Router.customRoute language change", () => {
     expect(reload).toHaveBeenCalled();
   });
 });
+
+// Neanderfunk: ?standort=0 unterdrueckt die Leiste "Standort"
+describe("Router standort=0", () => {
+  const ziele = () => {
+    const gotoLocation = vi.fn();
+    const fakeRouter = {
+      state: { lang: "de", view: "map" },
+      currentState: {},
+      language: { getLocale: (l: string) => l },
+      targets: [{ gotoLocation }],
+      init: true,
+      view: vi.fn(),
+      gotoNode: vi.fn(),
+      gotoLink: vi.fn(),
+      resetView: vi.fn(),
+      getParams: () => params,
+      paramsToUrl: Router.prototype.paramsToUrl,
+      generateLink: Router.prototype.generateLink,
+    };
+    return { gotoLocation, fakeRouter };
+  };
+  let params: { [k: string]: string[] } = {};
+  const match = { data: ["de", "map", undefined, undefined, "13", "51.2528", "6.9778"], hashString: "" };
+
+  it("gibt ohneLeiste weiter, wenn standort=0 gesetzt ist", () => {
+    params = { standort: ["0"] };
+    const { gotoLocation, fakeRouter } = ziele();
+    Router.prototype.customRoute.call(fakeRouter as never, match as never);
+    expect(gotoLocation).toHaveBeenCalledWith({ zoom: 13, lat: 51.2528, lng: 6.9778, ohneLeiste: true });
+  });
+
+  it("laesst die Leiste ohne Parameter wie bisher", () => {
+    params = {};
+    const { gotoLocation, fakeRouter } = ziele();
+    Router.prototype.customRoute.call(fakeRouter as never, match as never);
+    expect(gotoLocation).toHaveBeenCalledWith({ zoom: 13, lat: 51.2528, lng: 6.9778, ohneLeiste: false });
+  });
+
+  it("wirft standort weg, sobald jemand selbst einen Punkt waehlt", () => {
+    params = { standort: ["0"], "node.domain": ["x"] };
+    const { fakeRouter } = ziele();
+    const link = Router.prototype.generateLink.call(fakeRouter as never, { zoom: 15, lat: 51.1, lng: 6.9 }, false);
+    expect(link).toBe("#/15/51.1/6.9?node.domain=x");
+  });
+
+  it("behaelt standort beim Wechsel zu einem Knoten", () => {
+    params = { standort: ["0"] };
+    const { fakeRouter } = ziele();
+    const link = Router.prototype.generateLink.call(fakeRouter as never, { node: "abc" }, false);
+    expect(link).toBe("#/abc?standort=0");
+  });
+});

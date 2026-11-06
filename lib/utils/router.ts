@@ -8,7 +8,15 @@ export interface TargetLocation {
   lng: number;
   zoom: number;
   lat: number;
+  // Neanderfunk: nur Ausschnitt setzen, ohne die Leiste "Standort" (?standort=0)
+  ohneLeiste?: boolean;
 }
+
+// Neanderfunk: Hash-Parameter, der beim Aufruf mit Koordinaten die Leiste
+// "Standort" unterdrueckt, etwa fuer Links von Stadtseiten
+// (#/de/map/13/51.2528/6.9778?standort=0). Kein Filter: er bleibt beim
+// Filtern erhalten und faellt weg, sobald jemand selbst einen Punkt waehlt.
+export const STANDORT_PARAM = "standort";
 
 export interface Target {
   resetView(): void;
@@ -138,11 +146,13 @@ export class Router extends Navigo {
     } else if (link) {
       this.gotoLink({ linkId: link });
     } else if (lat) {
+      const ohneLeiste = this.getParams()[STANDORT_PARAM]?.[0] === "0";
       this.targets.forEach((target) => {
         target.gotoLocation({
           zoom: parseInt(this.currentState.zoom ?? "0", 10),
           lat: parseFloat(this.currentState.lat ?? "0"),
           lng: parseFloat(this.currentState.lng ?? "0"),
+          ohneLeiste,
         });
       });
     } else {
@@ -229,6 +239,10 @@ export class Router extends Navigo {
 
     // 4. Append query params
     const params = this.getParams();
+    // Wer selbst einen Punkt waehlt (Koordinatenwahl), will die Leiste sehen
+    if (data && data.lat !== undefined) {
+      delete params[STANDORT_PARAM];
+    }
     result += this.paramsToUrl(params);
 
     return result;
@@ -288,6 +302,12 @@ export class Router extends Navigo {
   setParams(params: { [param: string]: string[] }) {
     const hash = location.hash || "";
     const base = hash.split("?")[0] || "";
+    // Neanderfunk: standort=0 ist kein Filter und bleibt beim Filtern stehen,
+    // sonst ginge die Leiste auf, sobald jemand einen Filter setzt
+    const standort = this.getParams()[STANDORT_PARAM];
+    if (standort && !params[STANDORT_PARAM]) {
+      params = { ...params, [STANDORT_PARAM]: standort };
+    }
     location.hash = base + this.paramsToUrl(params);
   }
 
