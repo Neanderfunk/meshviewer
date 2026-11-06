@@ -350,7 +350,14 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
 
   self.gotoLocation = function gotoLocation(destination: L.LatLngLiteral & { zoom: number }) {
     button.disableTracking();
-    map.setView([destination.lat, destination.lng], destination.zoom);
+    // Lokaler Zusatz: der Punkt aus dem Link (#/de/map/<zoom>/<lat>/<lng>)
+    // kommt in die Mitte der sichtbaren Flaeche rechts der Seitenleiste, nicht
+    // in die Mitte des ganzen Fensters, wo ihn die Leiste halb verdeckt.
+    // Schmale Bildschirme: sidebarPadding() ist dort 0, wie bisher.
+    const zoom = destination.zoom;
+    const padding = L.point(sidebarPadding());
+    const center = map.project([destination.lat, destination.lng], zoom).subtract(padding.divideBy(2));
+    map.setView(map.unproject(center, zoom), zoom);
   };
 
   self.destroy = function destroy() {
