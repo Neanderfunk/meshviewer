@@ -4,7 +4,7 @@ Dieser Fork von [freifunk/meshviewer](https://github.com/freifunk/meshviewer)
 liefert die Karte `neander.map.freifunk.space` von Freifunk Neanderland aus.
 Der Zweig `main` folgt unverändert dem Original, unsere Änderungen liegen im
 Zweig `neanderfunk`, je Funktion ein Commit, ursprünglich auf dem Upstream-Stand `6c68e3d`
-(18.09.2026), seitdem per Merge nachgezogen (zuletzt `df76ed7`, 26.09.2026). Jeder Commit besteht die Typprüfung für sich; der Endstand
+(18.09.2026), seitdem per Merge nachgezogen (zuletzt `744cd2a`, 12.11.2026). Jeder Commit besteht die Typprüfung für sich; der Endstand
 besteht die Tests des Projekts.
 
 | Commit | Was |
@@ -52,6 +52,10 @@ git fetch upstream
 git merge upstream/main
 npm ci && npx tsc --noEmit && npx vitest run && npx vite build
 ```
+
+Upstream baut seit November 2026 mit Node 24; vitest und
+vite-plugin-checker brauchen mindestens Node 22.22. Diese Datei steht in
+`.prettierignore`, sonst polstert prettier die Tabelle oben auf volle Breite.
 
 Welche Commits unsere sind, zeigt dann
 `git log --no-merges --first-parent 6c68e3d..neanderfunk`.
