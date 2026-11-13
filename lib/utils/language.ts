@@ -55,6 +55,7 @@ export const Language = function () {
     momentjs?: {
       calendar?: Record<string, string>;
       relativeTime?: Record<string, string>;
+      relativeTimeWithoutSuffix?: Record<string, string>;
     };
     [k: string]: unknown;
   }
@@ -104,12 +105,12 @@ export const Language = function () {
 // relativeTimeWithoutSuffix mitbringen; fehlt sie, bleibt alles wie bisher.
 type RelativeTimeFn = (n: number, withoutSuffix: boolean) => string;
 export function relativeTimeSpec(momentjs: {
-  relativeTime: Record<string, string>;
+  relativeTime?: Record<string, string>;
   relativeTimeWithoutSuffix?: Record<string, string>;
-}): Record<string, string | RelativeTimeFn> {
+}): Record<string, string | RelativeTimeFn> | undefined {
   const mit = momentjs.relativeTime;
   const ohne = momentjs.relativeTimeWithoutSuffix;
-  if (!ohne) return mit;
+  if (!mit || !ohne) return mit;
   const spec: Record<string, string | RelativeTimeFn> = { ...mit };
   for (const key of Object.keys(ohne)) {
     if (key === "future" || key === "past" || !(key in mit)) continue;
