@@ -15,7 +15,7 @@ type TableNode = {
   vnode?: VNode;
 };
 
-type Modifier = (value: any, ctx?: ObjectsLinksAndNodes) => string | null;
+type Modifier = (value: unknown, ctx?: ObjectsLinksAndNodes) => string | null;
 
 type MappingEntry = {
   keys: string[];
@@ -37,7 +37,7 @@ type StatusFieldKey =
 const statusFieldMapping: Record<StatusFieldKey, MappingEntry> = {
   "node.status": {
     keys: ["is_online"],
-    nodeValueModifier: function (d: any) {
+    nodeValueModifier: function (d: unknown) {
       return d ? "online" : "offline";
     },
   },
@@ -49,9 +49,11 @@ const statusFieldMapping: Record<StatusFieldKey, MappingEntry> = {
   },
   "node.deprecationStatus": {
     keys: ["model"],
-    nodeValueModifier: function (d: any) {
-      if (window.config.deprecated && d && window.config.deprecated.includes(d)) return _.t("deprecation");
-      if (window.config.eol && d && window.config.eol.includes(d)) return _.t("eol");
+    nodeValueModifier: function (d: unknown) {
+      if (typeof d === "string") {
+        if (window.config.deprecated && window.config.deprecated.includes(d)) return _.t("deprecation");
+        if (window.config.eol && window.config.eol.includes(d)) return _.t("eol");
+      }
       return _.t("no");
     },
   },
@@ -60,15 +62,17 @@ const statusFieldMapping: Record<StatusFieldKey, MappingEntry> = {
   },
   "node.visible": {
     keys: ["location"],
-    nodeValueModifier: function (d: any) {
-      return d && d.longitude && d.latitude ? _.t("yes") : _.t("no");
+    nodeValueModifier: function (d: unknown) {
+      const loc = d as { longitude?: number; latitude?: number } | null | undefined;
+      return loc && loc.longitude && loc.latitude ? _.t("yes") : _.t("no");
     },
   },
   "node.update": {
     keys: ["autoupdater"],
-    nodeValueModifier: function (d: any) {
-      if (d && d.enabled) {
-        return d.branch;
+    nodeValueModifier: function (d: unknown) {
+      const updater = d as { enabled?: boolean; branch?: string } | null | undefined;
+      if (updater && updater.enabled && updater.branch) {
+        return updater.branch;
       }
       return _.t("node.deactivated");
     },
@@ -81,7 +85,7 @@ const statusFieldMapping: Record<StatusFieldKey, MappingEntry> = {
   },
   "node.domain": {
     keys: ["domain"],
-    nodeValueModifier: getDomainName,
+    nodeValueModifier: (d: unknown) => (typeof d === "string" ? getDomainName(d) : null),
   },
 };
 
@@ -97,20 +101,21 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
     render: () => {},
     renderSingle: () => {},
   };
-  let config = window.config;
-  let scale = d3Interpolate.interpolate(config.forceGraph.tqFrom, config.forceGraph.tqTo);
+  const config = window.config;
+  const scale = d3Interpolate.interpolate(config.forceGraph.tqFrom, config.forceGraph.tqTo);
   let time: Moment = moment();
 
-  let tables: Record<string, TableNode> = {};
+  const tables: Record<string, TableNode> = {};
   // flag set while we apply filters programmatically from the URL hash
   let appliedUrlFilters = false;
 
-  function count(nodes: Node[], keys: string[], nodeValueModifier?: (k: any, ctx?: any) => any, ctx?: any): any[][] {
-    const counts = new Map<any, number>();
+  type CountItem = [string, number, string[], Modifier | undefined];
+
+  function count(nodes: Node[], keys: string[], nodeValueModifier?: Modifier, ctx?: ObjectsLinksAndNodes): CountItem[] {
+    const counts = new Map<unknown, number>();
 
     nodes.forEach(function (node) {
-      // pass shallow copy of keys to dictGet
-      let dictKey = helper.dictGet(node, keys.slice(0));
+      let dictKey: unknown = helper.dictGet(node, keys);
 
       if (nodeValueModifier !== undefined) {
         dictKey = nodeValueModifier(dictKey, ctx);
@@ -121,7 +126,7 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
       counts.set(dictKey, (counts.get(dictKey) || 0) + 1);
     });
 
-    return helper.mergeSpellingVariants(counts).map(function ([value, total]) {
+    return helper.mergeSpellingVariants(counts).map(function ([value, total]): CountItem {
       return [value, total, keys, nodeValueModifier];
     });
   }
@@ -163,8 +168,8 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
     },
   });
 
-  function fillTable(name: string, table: TableNode | undefined, data: any[][]): TableNode {
-    let tableNode: TableNode = table ?? {
+  function fillTable(name: string, table: TableNode | undefined, data: CountItem[]): TableNode {
+    const tableNode: TableNode = table ?? {
       element: document.createElement("table"),
       vnode: undefined,
     };
@@ -174,25 +179,24 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
       return tableNode;
     }
 
-    let max = Math.max.apply(
-      Math,
-      data.map(function (data) {
-        return data[1];
+    const max = Math.max(
+      ...data.map(function (item) {
+        return item[1];
       }),
     );
 
-    let items = data.map(function (data) {
-      let v = data[1] / max;
+    const items = data.map(function (dataItem) {
+      const v = max > 0 ? dataItem[1] / max : 0;
 
-      let keys = data[2];
-      let value = data[0];
-      let modifierFunction = data[3];
-      let filter = GenericNodeFilter(name, keys, value, modifierFunction);
+      const keys = dataItem[2];
+      const value = dataItem[0];
+      const modifierFunction = dataItem[3];
+      const filter = GenericNodeFilter(name, keys, value, modifierFunction);
 
-      let a = h("a", { on: { click: addFilter(filter) } }, data[0]);
+      const a = h("a", { on: { click: addFilter(filter) } }, dataItem[0]);
 
-      let th = h("th", a);
-      let td = h(
+      const th = h("th", a);
+      const td = h(
         "td",
         h(
           "span",
@@ -202,23 +206,23 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
               backgroundColor: scale(v),
             },
           },
-          data[1].toFixed(0),
+          dataItem[1].toFixed(0),
         ),
       );
 
       return h("tr", [th, td]);
     });
-    let tableNew = h("table", { props: { className: "proportion" } }, items);
+    const tableNew = h("table", { props: { className: "proportion" } }, items);
     tableNode.vnode = patch(tableNode.vnode ?? tableNode.element, tableNew);
     return tableNode;
   }
 
   self.setData = function setData(data: ObjectsLinksAndNodes) {
-    let nodes = data.nodes.all;
+    const nodes = data.nodes.all;
     time = data.timestamp ?? moment();
 
-    function gatewayNameFromNodeId(nodeid: string | null) {
-      if (nodeid == null || !data.nodeDict) {
+    function gatewayNameFromNodeId(nodeid: unknown): string | null {
+      if (typeof nodeid !== "string" || !data.nodeDict) {
         return null;
       }
       const gateway = data.nodeDict[nodeid];
@@ -233,14 +237,14 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
     statusFieldMapping["node.selectedGatewayIPv4"].nodeValueModifier = gatewayNameFromNodeId;
     statusFieldMapping["node.selectedGatewayIPv6"].nodeValueModifier = gatewayNameFromNodeId;
 
-    function sortVersionCountAndName(a: unknown[], b: unknown[]) {
+    function sortVersionCountAndName(a: CountItem, b: CountItem) {
       // descending by count
-      if ((b[1] as number) !== (a[1] as number)) {
-        return (b[1] as number) - (a[1] as number);
+      if (b[1] !== a[1]) {
+        return b[1] - a[1];
       }
-      return compare(String(a[0]), String(b[0]));
+      return compare(a[0], b[0]);
     }
-    function processMapping(name: StatusFieldKey, sorter?: (a: any, b: any) => number) {
+    function processMapping(name: StatusFieldKey, sorter?: (a: CountItem, b: CountItem) => number) {
       const m = statusFieldMapping[name];
       const arr = count(nodes, m.keys, m.nodeValueModifier, data);
       const sorted = sorter
@@ -278,7 +282,7 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
       if (param === STANDORT_PARAM) {
         continue; // Neanderfunk: kein Filter, siehe router.ts
       }
-      if (!(param in statusFieldMapping)) {
+      if (!helper.hasOwn(statusFieldMapping, param)) {
         console.warn("unknown_filter_param", param);
         continue; // continue instead of return to process other params
       }
@@ -290,7 +294,7 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
           encodedValue = encodedValue.slice(1);
         }
 
-        let filter = GenericNodeFilter(
+        const filter = GenericNodeFilter(
           param,
           mapping.keys,
           helper.collapseWhitespace(encodedValue),
@@ -334,10 +338,10 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
     self.renderSingle(el, "node.domain");
 
     if (config.globalInfos) {
-      let images = document.createElement("div");
+      const images = document.createElement("div");
       el.appendChild(images);
       const img: VNode[] = [];
-      let subst = {
+      const subst = {
         "{TIME}": String(time.unix()),
         "{LOCALE}": _.locale(),
       };
@@ -349,7 +353,7 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
     }
 
     if (config.globalCharts.length) {
-      let chartsEl = document.createElement("div");
+      const chartsEl = document.createElement("div");
       el.appendChild(chartsEl);
       const charts = config.globalCharts.flatMap((chart) => [h("h2", chart.name), createChartVNode(chart, {})]);
       patch(chartsEl, h("div", charts));
@@ -363,7 +367,7 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
       return;
     }
 
-    let h2 = document.createElement("h2");
+    const h2 = document.createElement("h2");
     h2.classList.add("proportion-header");
     h2.textContent = _.t(mappingName);
     h2.onclick = function onclick() {

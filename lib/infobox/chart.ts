@@ -10,6 +10,7 @@ import { format as d3Format } from "d3-format";
 import { schemeTableau10 } from "d3-scale-chromatic";
 import { _ } from "../utils/language.js";
 import { Chart, ChartRange, ChartSeries, NodeValue } from "../config_default.js";
+import { buildChartHref } from "./chartHref.js";
 
 interface Series {
   name: string;
@@ -20,6 +21,34 @@ interface ParsedChart {
   series: Series[];
   xDomain: [number, number];
   yDomain: [number, number];
+}
+
+interface GrafanaFrameField {
+  config?: {
+    displayNameFromDS?: string;
+  };
+}
+
+interface GrafanaFrameSchema {
+  name?: string;
+  fields?: GrafanaFrameField[];
+}
+
+interface GrafanaFrameData {
+  values?: [number[], (number | null)[]];
+}
+
+interface GrafanaFrame {
+  schema?: GrafanaFrameSchema;
+  data?: GrafanaFrameData;
+}
+
+interface GrafanaQueryResult {
+  frames?: GrafanaFrame[];
+}
+
+interface GrafanaResponse {
+  results?: Record<string, GrafanaQueryResult>;
 }
 
 function parseRelativeMs(t: string): number {
@@ -44,7 +73,7 @@ async function fetchChartData(
   orgId: number,
   chart: Chart,
   subst: Record<string, string>,
-): Promise<any> {
+): Promise<GrafanaResponse> {
   const fromStr = chart.from ?? "now-7d";
   const toStr = chart.to ?? "now-1m";
   const maxDataPoints = chart.maxDataPoints ?? 300;
@@ -54,7 +83,7 @@ async function fetchChartData(
   if (chart.datasourceType === "fixture") {
     const response = await fetch(`./${chart.datasourceUid}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
+    return response.json() as Promise<GrafanaResponse>;
   }
 
   const query = applySubst(chart.query, subst);
@@ -89,7 +118,7 @@ async function fetchChartData(
     }),
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  return response.json();
+  return response.json() as Promise<GrafanaResponse>;
 }
 
 // --- prometheus-direct ------------------------------------------------------
@@ -168,7 +197,7 @@ async function fetchPrometheusDirect(
   return { series, xDomain: [tMin, tMax], yDomain: [Math.min(vMin, 0), Math.max(vMax, 1)] };
 }
 
-function parseResults(results: Record<string, any>, configMap: Map<string, ChartSeries>): ParsedChart {
+function parseResults(results: Record<string, GrafanaQueryResult>, configMap: Map<string, ChartSeries>): ParsedChart {
   const series: Series[] = [];
   let tMin = Infinity,
     tMax = -Infinity;
@@ -355,7 +384,7 @@ export function createChartVNode(chart: Chart, subst: Record<string, string>): V
   const promUrl = (prometheus?.url ?? "").replace(/\/$/, "");
   const orgId = grafana?.orgId ?? 1;
 
-  return h("div", {
+  const chartVNode = h("div", {
     class: { "node-chart": true },
     hook: {
       insert: async (vnode: VNode) => {
@@ -378,6 +407,20 @@ export function createChartVNode(chart: Chart, subst: Record<string, string>): V
       },
     },
   });
+
+  const href = buildChartHref(chart, subst);
+  if (!href) {
+    return chartVNode;
+  }
+
+  return h(
+    "a",
+    {
+      class: { "node-chart-link": true },
+      props: { href, target: "_blank", rel: "noopener noreferrer" },
+    },
+    chartVNode,
+  );
 }
 
 // --- Zeitraeume -------------------------------------------------------------
@@ -434,13 +477,27 @@ export function createChartsVNode(charts: Chart[], subst: Record<string, string>
         leiste.className = "node-chart-ranges";
         wurzel.appendChild(leiste);
 
+        // Mit href (upstream seit 10.11.2026) wird das Diagramm ein Link, etwa
+        // ins Grafana-Dashboard; $from/$to folgen dem gewaehlten Zeitraum.
+        const links: (HTMLAnchorElement | null)[] = [];
         const flaechen: HTMLElement[] = charts.map((chart) => {
           const titel = document.createElement("h4");
           titel.textContent = chart.name;
           wurzel.appendChild(titel);
           const el = document.createElement("div");
           el.className = "node-chart";
-          wurzel.appendChild(el);
+          if (chart.href) {
+            const a = document.createElement("a");
+            a.className = "node-chart-link";
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+            a.appendChild(el);
+            wurzel.appendChild(a);
+            links.push(a);
+          } else {
+            wurzel.appendChild(el);
+            links.push(null);
+          }
           return el;
         });
 
@@ -448,8 +505,11 @@ export function createChartsVNode(charts: Chart[], subst: Record<string, string>
           const zeitraum = zeitraeume[gewaehlterZeitraum]!;
           Array.from(leiste.children).forEach((b, i) => b.classList.toggle("active", i === gewaehlterZeitraum));
           charts.forEach((chart, i) => {
+            const gewaehlt = { ...chart, from: zeitraum.from, to: chart.to ?? "now" };
+            const href = links[i] ? buildChartHref(gewaehlt, subst) : undefined;
+            if (href) links[i]!.href = href;
             flaechen[i]!.textContent = "";
-            void zeichneDiagramm(flaechen[i]!, { ...chart, from: zeitraum.from, to: chart.to ?? "now" }, subst);
+            void zeichneDiagramm(flaechen[i]!, gewaehlt, subst);
           });
         };
 

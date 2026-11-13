@@ -1,18 +1,21 @@
 import moment from "moment";
-import * as helper from "./helper.js";
+import { getJSON } from "./http.js";
 import Polyglot from "node-polyglot";
 import { Router } from "./router.js";
 
 export type LanguageCode = string;
 
-export let _: Polyglot & { phrases?: { [k: string]: any } };
+export let _: Polyglot & { phrases?: Record<string, string> } = new Polyglot({
+  phrases: {},
+  allowMissing: true,
+});
 
 export const Language = function () {
   let router: Router;
   const config = window.config;
 
   function languageSelect(el: HTMLElement) {
-    let select = document.createElement("select");
+    const select = document.createElement("select");
     select.className = "language-switch";
     select.setAttribute("aria-label", "Language");
     select.addEventListener("change", setSelectLocale);
@@ -26,12 +29,13 @@ export const Language = function () {
     }
   }
 
-  function setSelectLocale(event: any) {
-    router.deepUrl({ lang: event.target.value });
+  function setSelectLocale(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    router.deepUrl({ lang: target.value });
   }
 
   function getLocale(input?: LanguageCode): LanguageCode {
-    let language: LanguageCode = input || (navigator.languages && navigator.languages[0]) || navigator.language;
+    const language: LanguageCode = input || (navigator.languages && navigator.languages[0]) || navigator.language;
     const defaultLocale = config.supportedLocale[0];
     if (defaultLocale === undefined) {
       throw new Error("config.supportedLocale must contain at least one locale");
@@ -47,10 +51,18 @@ export const Language = function () {
     return locale;
   }
 
-  function setTranslation(translationJson: { [k: string]: any }) {
+  interface TranslationData {
+    momentjs?: {
+      calendar?: Record<string, string>;
+      relativeTime?: Record<string, string>;
+    };
+    [k: string]: unknown;
+  }
+
+  function setTranslation(translationJson: TranslationData) {
     _.extend(translationJson);
 
-    if (moment.locale(_.locale()) !== _.locale()) {
+    if (moment.locale(_.locale()) !== _.locale() && translationJson.momentjs) {
       moment.defineLocale(_.locale(), {
         longDateFormat: {
           LT: "HH:mm",
@@ -70,7 +82,11 @@ export const Language = function () {
     router = routing;
     /** global: _ */
     _ = new Polyglot({ locale: getLocale(routing.getLang() ?? undefined), allowMissing: true });
-    helper.getJSON("locale/" + _.locale() + ".json?" + config.cacheBreaker).then(setTranslation);
+    getJSON<TranslationData>("locale/" + _.locale() + ".json?" + config.cacheBreaker)
+      .then(setTranslation)
+      .catch(function (e: unknown) {
+        console.warn("Failed to load translations:", e);
+      });
     document.querySelector("html")!.setAttribute("lang", _.locale());
   }
 

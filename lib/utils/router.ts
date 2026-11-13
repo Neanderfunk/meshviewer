@@ -3,6 +3,7 @@ import { Language } from "./language.js";
 import { Link, Node, NodeId } from "./node.js";
 import { ObjectsLinksAndNodes } from "../datadistributor.js";
 import { MESHVIEWER_ROUTE_PATTERN } from "./routerUtils.js";
+import { hasOwn } from "./object.js";
 
 export interface TargetLocation {
   lng: number;
@@ -20,13 +21,13 @@ export const STANDORT_PARAM = "standort";
 
 export interface Target {
   resetView(): void;
-  gotoNode(node: Node, nodeDict: { [k: NodeId]: Node }): any;
-  gotoLink(link: [Link, ...Link[]]): any;
-  gotoLocation(locationData: TargetLocation): any;
+  gotoNode(node: Node, nodeDict: { [k: NodeId]: Node }): void;
+  gotoLink(link: [Link, ...Link[]]): void;
+  gotoLocation(locationData: TargetLocation): void;
 }
 
 interface Views {
-  [k: string]: () => any;
+  [k: string]: () => void;
 }
 
 type RouteData = Record<string, string> | string[] | null;
@@ -77,7 +78,7 @@ export class Router extends Navigo {
 
   gotoNode(node: { nodeId: NodeId }) {
     const dict = this.objects.nodeDict ?? {};
-    const n = dict[node.nodeId];
+    const n = hasOwn(dict, node.nodeId) ? dict[node.nodeId] : undefined;
     if (n) {
       this.targets.forEach((target) => {
         target.gotoNode(n, dict);
@@ -110,7 +111,7 @@ export class Router extends Navigo {
   customRoute(match?: Match) {
     const d = match?.data as RouteData;
     const lang = routeGroup(d, 0);
-    let viewValue: "map" | "graph" | string | undefined = routeGroup(d, 1);
+    let viewValue: string | undefined = routeGroup(d, 1);
     const node = routeGroup(d, 2);
     const link = routeGroup(d, 3);
     const zoom = routeGroup(d, 4);
@@ -320,7 +321,7 @@ export class Router extends Navigo {
     });
   }
 
-  addView(key: string, view: () => any) {
+  addView(key: string, view: () => void) {
     this.views[key] = view;
   }
 

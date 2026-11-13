@@ -8,18 +8,19 @@ import { Button } from "./map/button.js";
 import "./map/activearea.js";
 import { Sidebar } from "./sidebar.js";
 import { LatLng } from "leaflet";
-import { Link, LinkId, Node, NodeId } from "./utils/node.js";
+import { Link, LinkId, LinkScale, Node, NodeId } from "./utils/node.js";
 import { ObjectsLinksAndNodes } from "./datadistributor.js";
+import { StyledMarker, StyledPolyline } from "./map/labellayer.js";
 import { loadGeoLayers } from "./map/geoUtils.js";
 import { Notice } from "./map/notice.js";
 
-let options = {
+const options = {
   worldCopyJump: true,
   zoomControl: true,
   minZoom: 0,
 };
 
-export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typeof Sidebar>, buttons: HTMLElement) {
+export const Map = function (linkScale: LinkScale, sidebar: ReturnType<typeof Sidebar>, buttons: HTMLElement) {
   const self: {
     setData: (data: ObjectsLinksAndNodes) => void;
     resetView: () => void;
@@ -31,18 +32,18 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
   } = {
     setData: () => {},
     resetView: () => {},
-    gotoNode: (_n, _d) => {},
+    gotoNode: () => {},
     gotoLink: () => {},
     gotoLocation: () => {},
     destroy: () => {},
     render: () => {},
   };
   let savedView: { center: LatLng; zoom: number } | undefined;
-  let config = window.config;
+  const config = window.config;
 
-  let map: L.Map & { setActiveArea?: any };
+  let map: L.Map;
   let layerControl: L.Control.Layers;
-  let baseLayers: Record<string, L.Layer> = {};
+  const baseLayers: Record<string, L.Layer> = {};
 
   function saveView() {
     savedView = {
@@ -69,13 +70,13 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
     setTimeout(mapActiveArea, 300);
   }
 
-  let el = document.createElement("div");
+  const el = document.createElement("div");
   el.classList.add("map");
 
   map = L.map(el, options);
   mapActiveArea();
 
-  let now = new Date();
+  const now = new Date();
   config.mapLayers.forEach(function (item, i) {
     if (
       (typeof item.config.start === "number" && item.config.start <= now.getHours()) ||
@@ -91,8 +92,8 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
     return a.config.order - b.config.order;
   });
 
-  let layers = config.mapLayers.map(function (layer) {
-    let layerConfig = Object.assign({}, layer.config);
+  const layers = config.mapLayers.map(function (layer) {
+    const layerConfig = Object.assign({}, layer.config);
     if (layerConfig.invertInDarkMode) {
       layerConfig.className = (layerConfig.className ? layerConfig.className + " " : "") + "invert-in-dark-mode";
     }
@@ -134,7 +135,7 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
     baseLayers[layer.name] = layer.layer;
   });
 
-  let button = Button(map, buttons);
+  const button = Button(map, buttons);
 
   map.on("locationfound", button.locationFound);
   map.on("locationerror", button.locationError);
@@ -147,7 +148,7 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
   const notice = Notice(map);
 
   if (config.geo) {
-    loadGeoLayers(
+    void loadGeoLayers(
       config.geo,
       function (layer) {
         if (!isDestroyed) {
@@ -172,13 +173,11 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
 
   map.zoomControl.setPosition("topright");
 
-  // @ts-ignore
-  let clientLayer = new ClientLayer({ minZoom: config.clientZoom });
+  const clientLayer = new ClientLayer({ minZoom: config.clientZoom });
   clientLayer.addTo(map);
   clientLayer.setZIndex(5);
 
-  // @ts-ignore
-  let labelLayer = new LabelLayer({ minZoom: config.labelZoom });
+  const labelLayer = new LabelLayer({ minZoom: config.labelZoom });
   labelLayer.addTo(map);
   labelLayer.setZIndex(6);
 
@@ -189,7 +188,7 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
     labelLayer.redraw();
   });
 
-  map.on("baselayerchange", function (e: any & { name: string }) {
+  map.on("baselayerchange", function (e: L.LayersControlEvent) {
     const selectedLayer = baseLayers[e.name] as L.TileLayer;
     if (selectedLayer) {
       if (selectedLayer.options.maxZoom !== undefined) {
@@ -206,44 +205,30 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
   });
 
   map.on("load", function () {
-    let inputs = document.querySelectorAll(".leaflet-control-layers-selector");
-    [].forEach.call(inputs, function (input: HTMLInputElement) {
+    const inputs = document.querySelectorAll<HTMLInputElement>(".leaflet-control-layers-selector");
+    inputs.forEach(function (input) {
       input.setAttribute("role", "radiogroup");
-      // @ts-ignore
-      input.setAttribute("aria-label", input.nextSibling.innerHTML.trim());
+      const label = input.nextElementSibling;
+      if (label) {
+        input.setAttribute("aria-label", label.innerHTML.trim());
+      }
     });
   });
 
-  let nodeDict: Record<
-    string,
-    {
-      setStyle: (s: any) => void;
-      getLatLng: () => L.LatLngExpression;
-      getBounds?: () => L.LatLngBoundsExpression;
-      resetStyle: () => void;
-    }
-  > = {};
-  let linkDict: Record<
-    string,
-    {
-      setStyle: (s: any) => void;
-      getLatLng: () => L.LatLngExpression;
-      getBounds?: () => L.LatLngBoundsExpression;
-      resetStyle: () => void;
-    }
-  > = {};
+  let nodeDict = Object.create(null) as Record<string, StyledMarker>;
+  let linkDict = Object.create(null) as Record<string, StyledPolyline>;
   let highlight: { type: "node"; o: Node } | { type: "link"; o: Link } | undefined;
 
   function resetMarkerStyles(
-    nodes: { [k: NodeId]: { resetStyle: () => any } },
-    links: { [k: LinkId]: { resetStyle: () => any } },
+    nodes: { [k: NodeId]: { resetStyle?: () => void } },
+    links: { [k: LinkId]: { resetStyle?: () => void } },
   ) {
     Object.values(nodes).forEach(function (entry) {
-      entry.resetStyle();
+      entry.resetStyle?.();
     });
 
     Object.values(links).forEach(function (entry) {
-      entry.resetStyle();
+      entry.resetStyle?.();
     });
   }
 
@@ -262,13 +247,15 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
     return right > 0 && right < map.getSize().x / 2 ? [right, 0] : [0, 0];
   }
 
-  function goto(element: { getLatLng: () => L.LatLngExpression; getBounds?: () => L.LatLngBoundsExpression }) {
+  function goto(element: { getLatLng?: () => L.LatLngExpression; getBounds?: () => L.LatLngBoundsExpression }) {
     let bounds: L.LatLngBoundsExpression;
 
     if ("getBounds" in element && typeof element.getBounds === "function") {
       bounds = element.getBounds()!;
-    } else {
+    } else if ("getLatLng" in element && typeof element.getLatLng === "function") {
       bounds = L.latLngBounds([element.getLatLng()]);
+    } else {
+      return element;
     }
 
     setView(bounds);
@@ -278,8 +265,7 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
 
   function updateView(nopanzoom?: boolean) {
     resetMarkerStyles(nodeDict, linkDict);
-    let target:
-      { setStyle: any; getLatLng: () => L.LatLngExpression; getBounds?: () => L.LatLngBoundsExpression } | undefined;
+    let target: StyledMarker | StyledPolyline | undefined;
 
     if (highlight !== undefined) {
       if (highlight.type === "node") {
@@ -321,8 +307,8 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
   }
 
   self.setData = function setData(data: ObjectsLinksAndNodes) {
-    nodeDict = {};
-    linkDict = {};
+    nodeDict = Object.create(null) as Record<string, StyledMarker>;
+    linkDict = Object.create(null) as Record<string, StyledPolyline>;
 
     clientLayer.setData(data);
     labelLayer.setData(data, map, nodeDict, linkDict, linkScale);
@@ -336,7 +322,7 @@ export const Map = function (linkScale: (t: any) => any, sidebar: ReturnType<typ
     updateView();
   };
 
-  self.gotoNode = function gotoNode(node: Node, _nodeDict: { [k: NodeId]: Node }) {
+  self.gotoNode = function gotoNode(node: Node) {
     button.disableTracking();
     highlight = { type: "node", o: node };
     updateView();

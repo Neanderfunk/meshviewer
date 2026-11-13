@@ -11,9 +11,9 @@ import draw, { MapLink, MapNode } from "./forcegraph/draw.js";
 import { Sidebar } from "./sidebar.js";
 import { ClientPointEvent } from "d3-selection";
 import { ObjectsLinksAndNodes } from "./datadistributor.js";
-import { Link, Node, NodeId } from "./utils/node.js";
+import { Link, LinkScale, Node, NodeId } from "./utils/node.js";
 
-export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnType<typeof Sidebar>) {
+export const ForceGraph = function (linkScale: LinkScale, sidebar: ReturnType<typeof Sidebar>) {
   const self: {
     setData: (data: ObjectsLinksAndNodes) => void;
     resetView: () => void;
@@ -25,7 +25,7 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
   } = {
     setData: () => {},
     resetView: () => {},
-    gotoNode: (_a, _b) => {},
+    gotoNode: () => {},
     gotoLink: () => {},
     gotoLocation: () => {},
     destroy: () => {},
@@ -34,25 +34,25 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
   let el: HTMLElement;
   let canvas: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-  let force: d3Force.Simulation<d3Force.SimulationNodeDatum, undefined> | null;
-  let forceLink: d3Force.Force<d3Force.SimulationNodeDatum, undefined> & { links?: (links: any) => any };
+  let force: d3Force.Simulation<MapNode, undefined> | null;
+  let forceLink: d3Force.ForceLink<MapNode, MapLink>;
 
   let transform = d3Zoom.zoomIdentity;
   let intNodes: MapNode[] = [];
-  let dictNodes: Record<string, MapNode> = {};
+  const dictNodes = Object.create(null) as Record<string, MapNode>;
   let intLinks: MapLink[] = [];
   let movetoTimer: ReturnType<typeof setTimeout>;
   let initial = 1.8;
 
-  let NODE_RADIUS_DRAG = 10;
-  let NODE_RADIUS_SELECT = 15;
-  let LINK_RADIUS_SELECT = 12;
-  let ZOOM_ANIMATE_DURATION = 350;
+  const NODE_RADIUS_DRAG = 10;
+  const NODE_RADIUS_SELECT = 15;
+  const LINK_RADIUS_SELECT = 12;
+  const ZOOM_ANIMATE_DURATION = 350;
 
-  let ZOOM_MIN = 1 / 8;
-  let ZOOM_MAX = 3;
+  const ZOOM_MIN = 1 / 8;
+  const ZOOM_MAX = 3;
 
-  let FORCE_ALPHA = 0.01;
+  const FORCE_ALPHA = 0.01;
 
   draw.setTransform(transform);
 
@@ -113,7 +113,6 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
     const router = window.router;
 
     if (node !== undefined) {
-      // @ts-expect-error d3 simulation node has o
       router.fullUrl({ node: node.o.node_id });
       return;
     }
@@ -149,21 +148,18 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
   el.classList.add("graph");
 
   forceLink = d3Force
-    .forceLink()
-    .distance(function (node) {
-      // @ts-expect-error d3 node
-      if (node.o.type.indexOf("vpn") === 0) {
+    .forceLink<MapNode, MapLink>()
+    .distance(function (link) {
+      if (link.o.type.indexOf("vpn") === 0) {
         return window.config.forceGraph.vpnLinkDistance ?? 0;
       }
       return 75;
     })
-    .strength(function (node) {
-      // @ts-expect-error d3 node
-      if (node.o.type.indexOf("vpn") === 0) {
+    .strength(function (link) {
+      if (link.o.type.indexOf("vpn") === 0) {
         return window.config.forceGraph.vpnLinkStrength ?? 0.02;
       }
-      // @ts-expect-error d3 node
-      return Math.max(0.5, node.o.source_tq);
+      return Math.max(0.5, link.o.source_tq);
     });
 
   const zoom = d3Zoom
@@ -176,7 +172,7 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
     });
 
   force = d3Force
-    .forceSimulation()
+    .forceSimulation<MapNode>()
     .force("link", forceLink)
     .force(
       "charge",
@@ -237,7 +233,7 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
   });
 
   self.setData = function setData(data: ObjectsLinksAndNodes) {
-    const nd = data.nodeDict ?? {};
+    const nd = data.nodeDict ?? (Object.create(null) as Record<string, Node>);
 
     intNodes = data.nodes.all.map(function (nodeData) {
       let node = dictNodes[nodeData.node_id];
@@ -304,7 +300,7 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
     }
 
     force!.nodes(intNodes);
-    forceLink.links!(intLinks);
+    forceLink.links(intLinks);
 
     force!
       .alpha(initial)
@@ -325,7 +321,7 @@ export const ForceGraph = function (linkScale: (t: any) => any, sidebar: ReturnT
     }, true);
   };
 
-  self.gotoNode = function gotoNode(nodeData: Node, _nodeDict: { [k: NodeId]: Node }) {
+  self.gotoNode = function gotoNode(nodeData: Node) {
     moveTo(function calcToNode() {
       draw.setHighlight({ type: "node", id: nodeData.node_id });
       const node = dictNodes[nodeData.node_id];

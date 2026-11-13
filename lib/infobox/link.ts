@@ -3,13 +3,13 @@ import { _ } from "../utils/language.js";
 import * as helper from "../utils/helper.js";
 import { LinkInfo } from "../config_default.js";
 import { ObjectsLinksAndNodes } from "../datadistributor.js";
-import { Link as LinkData } from "../utils/node.js";
+import { Link as LinkData, LinkScale } from "../utils/node.js";
 import { createChartsVNode } from "./chart.js";
 
 const patch = init([classModule, propsModule, styleModule, eventListenersModule]);
 
 function showStatImg(images: VNode[], linkInfo: LinkInfo, link: LinkData, time: string) {
-  let subst: ReplaceMapping = {
+  const subst: ReplaceMapping = {
     "{SOURCE_ID}": link.source.node_id,
     "{SOURCE_NAME}": link.source.hostname.replace(/[^a-z0-9\-]/gi, "_"),
     "{SOURCE_ADDR}": link.source_addr,
@@ -27,18 +27,18 @@ function showStatImg(images: VNode[], linkInfo: LinkInfo, link: LinkData, time: 
   images.push(helper.showStat(linkInfo, subst));
 }
 
-export const Link = function (el: HTMLElement, linkData: [LinkData, ...LinkData[]], linkScale: (t: any) => any) {
-  let container = document.createElement("div");
+export const Link = function (el: HTMLElement, linkData: [LinkData, ...LinkData[]], linkScale: LinkScale) {
+  const container = document.createElement("div");
   el.appendChild(container);
   let containerVnode: VNode | undefined;
 
   const self = {
     render() {
-      let config = window.config;
-      let router = window.router;
-      let children: VNode[] = [];
-      let img: VNode[] = [];
-      let time = linkData[0].target.lastseen.format("DDMMYYYYHmmss");
+      const config = window.config;
+      const router = window.router;
+      const children: VNode[] = [];
+      const img: VNode[] = [];
+      const time = linkData[0].target.lastseen.format("DDMMYYYYHmmss");
 
       helper.attributeEntry(
         children,
@@ -86,7 +86,7 @@ export const Link = function (el: HTMLElement, linkData: [LinkData, ...LinkData[
         });
       }
 
-      let newContainer = h("div", [
+      const newContainer = h("div", [
         h(
           "div",
           h("h2", [

@@ -9,6 +9,7 @@ import * as helper from "./utils/helper.js";
 import { Link, Node } from "./utils/node.js";
 import { ObjectsLinksAndNodes } from "./datadistributor.js";
 import { resolveValidLinks } from "./mainDataUtils.js";
+import { showLoaderError } from "./utils/loader.js";
 
 export const main = () => {
   function normalizeHash(hash: string) {
@@ -58,7 +59,11 @@ export const main = () => {
 
     window.addEventListener("hashchange", postHashToParent);
     window.addEventListener("message", function (event) {
-      if (event && event.data && typeof event.data.hash === "string") {
+      // The embedding page may live on any domain, so check the sender, not the origin.
+      if (event.source !== window.parent) {
+        return;
+      }
+      if (event.data && typeof event.data.hash === "string") {
         replaceHash(event.data.hash);
       }
     });
@@ -69,7 +74,7 @@ export const main = () => {
     let timestamp = "";
     let nodes: Node[] = [];
     let links: Link[] = [];
-    const nodeDict: Record<string, Node> = {};
+    const nodeDict = Object.create(null) as Record<string, Node>;
 
     for (const entry of data) {
       nodes = nodes.concat(entry.nodes);
@@ -99,7 +104,7 @@ export const main = () => {
       nodeDict[node.node_id] = node;
     });
 
-    let validLinks = resolveValidLinks(links, nodeDict);
+    const validLinks = resolveValidLinks(links, nodeDict);
 
     validLinks.forEach(function (link) {
       link.id = [link.source.node_id, link.target.node_id].join("-");
@@ -112,7 +117,7 @@ export const main = () => {
         link.latlngs = [source, target];
 
         link.distance = source.distanceTo(target);
-      } catch (e) {
+      } catch {
         // ignore exception
       }
     });
@@ -145,8 +150,14 @@ export const main = () => {
 
   language.init(router);
 
+  interface RawData {
+    links: Link[];
+    nodes: Node[];
+    timestamp: string;
+  }
+
   function fetchData() {
-    return Promise.all(config.dataPath.map(helper.getJSON));
+    return Promise.all(config.dataPath.map((p) => helper.getJSON<RawData>(p)));
   }
 
   function update() {
@@ -187,11 +198,14 @@ export const main = () => {
       postHashToParent();
 
       const refresh = function () {
-        update().then(function (fresh) {
-          const nd = fresh as ObjectsLinksAndNodes;
-          gui.setData(nd);
-          router.setData(nd);
-        });
+        update()
+          .then(function (fresh) {
+            gui.setData(fresh);
+            router.setData(fresh);
+          })
+          .catch(function (e: unknown) {
+            console.warn("Periodic data update failed:", e);
+          });
       };
 
       // Lokaler Zusatz: ein Tab, der lange im Hintergrund liegt, laedt nicht
@@ -230,13 +244,7 @@ export const main = () => {
       }, 60000);
     })
     .catch(function (e: unknown) {
-      const message = e instanceof Error ? e.message : String(e);
-      const loader = document.querySelector(".loader");
-      if (loader) {
-        loader.innerHTML +=
-          message +
-          '<br /><br /><button onclick="location.reload(true)" class="btn text" aria-label="Try to reload">Try to reload</button><br /> or report to your community';
-      }
+      showLoaderError(e instanceof Error ? e.message : String(e), undefined, "or report to your community");
       console.warn(e);
     });
 };

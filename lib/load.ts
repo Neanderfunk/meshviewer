@@ -1,5 +1,6 @@
 import { config as defaultConfig } from "./config_default.js";
 import { main } from "./main.js";
+import { showLoaderError } from "./utils/loader.js";
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
@@ -19,16 +20,6 @@ const deepMerge = <T>(defaults: T, overrides: unknown): T => {
   return result as T;
 };
 
-const showLoaderError = (message: string, hint = "") => {
-  document.querySelector(".loader")!.innerHTML =
-    message +
-    "<br><br>" +
-    '<button onclick="location.reload(true)" class="btn text" aria-label="Try to reload">' +
-    "Try to reload" +
-    "</button><br>" +
-    hint;
-};
-
 export const load = async () => {
   let configResponse: Response;
   try {
@@ -40,10 +31,24 @@ export const load = async () => {
     return;
   }
   if (!configResponse.ok) {
-    showLoaderError("config.json can not be loaded:<br>" + configResponse.statusText, "or report to your community");
+    showLoaderError(
+      "config.json can not be loaded:",
+      `${configResponse.status} ${configResponse.statusText}`.trim(),
+      "or report to your community",
+    );
     return;
   }
-  const config = await configResponse.json();
+  let config: unknown;
+  try {
+    config = await configResponse.json();
+  } catch (e) {
+    showLoaderError(
+      "config.json is not valid JSON:",
+      e instanceof Error ? e.message : String(e),
+      "or report to your community",
+    );
+    return;
+  }
   window.config = deepMerge(defaultConfig, config);
   main();
 };

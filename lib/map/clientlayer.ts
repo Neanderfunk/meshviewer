@@ -3,58 +3,67 @@ import RBush from "rbush";
 import * as helper from "../utils/helper.js";
 import { Node } from "../utils/node.js";
 import { ObjectsLinksAndNodes } from "../datadistributor.js";
-import { Coords } from "leaflet";
 import { nodeIdToStartAngle } from "./clientlayerUtils.js";
 
-export const ClientLayer = L.GridLayer.extend({
-  mapRTree: function mapRTree(node: Node) {
-    return {
-      minX: node.location.latitude,
-      minY: node.location.longitude,
-      maxX: node.location.latitude,
-      maxY: node.location.longitude,
-      node: node,
-    };
-  },
-  setData: function (data: ObjectsLinksAndNodes) {
-    let rtreeOnlineAll = new RBush(9);
+interface ClientRTreeItem {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  node: Node;
+  startAngle: number;
+}
 
-    this.data = rtreeOnlineAll.load(data.nodes.online.filter(helper.hasLocation).map(this.mapRTree));
-
+function mapRTree(node: Node): ClientRTreeItem {
+  return {
+    minX: node.location.latitude,
+    minY: node.location.longitude,
+    maxX: node.location.latitude,
+    maxY: node.location.longitude,
+    node: node,
     // pre-calculate start angles
-    this.data.all().forEach(function (positionedNode: { startAngle: number; node: Node }) {
-      positionedNode.startAngle = nodeIdToStartAngle(positionedNode.node.node_id);
-    });
+    startAngle: nodeIdToStartAngle(node.node_id),
+  };
+}
+
+export class ClientLayer extends L.GridLayer {
+  declare options: L.GridLayerOptions;
+  private data?: RBush<ClientRTreeItem>;
+
+  setData(data: ObjectsLinksAndNodes) {
+    this.data = new RBush<ClientRTreeItem>(9);
+    this.data.load(data.nodes.online.filter(helper.hasLocation).map(mapRTree));
     this.redraw();
-  },
-  createTile: function (tilePoint: Coords) {
-    const tile = L.DomUtil.create("canvas", "leaflet-tile") as HTMLCanvasElement;
+  }
 
-    const tileSize = this.options.tileSize;
-    tile.width = tileSize as number;
-    tile.height = tileSize as number;
+  protected createTile(tilePoint: L.Coords) {
+    const tile = L.DomUtil.create<"canvas">("canvas", "leaflet-tile");
 
-    if (!this.data) {
+    const tileSize = this.getTileSize().x;
+    tile.width = tileSize;
+    tile.height = tileSize;
+
+    if (!this.data || !this._map) {
       return tile;
     }
 
     const ctx = tile.getContext("2d")!;
-    let size = tilePoint.multiplyBy(tileSize);
-    let map = this._map;
+    const size = tilePoint.multiplyBy(tileSize);
+    const map = this._map;
 
-    let margin = 50;
-    let bbox = helper.getTileBBox(size, map, tileSize, margin);
+    const margin = 50;
+    const bbox = helper.getTileBBox(size, map, tileSize, margin);
 
-    let nodes = this.data.search(bbox);
+    const nodes = this.data.search(bbox);
 
     if (nodes.length === 0) {
       return tile;
     }
 
-    let startDistance = 10;
+    const startDistance = 10;
 
-    nodes.forEach(function (node: { node: Node; startAngle: number }) {
-      let point = map.project([node.node.location.latitude, node.node.location.longitude]);
+    nodes.forEach(function (node) {
+      const point = map.project([node.node.location.latitude, node.node.location.longitude]);
 
       point.x -= size.x;
       point.y -= size.y;
@@ -63,5 +72,5 @@ export const ClientLayer = L.GridLayer.extend({
     });
 
     return tile;
-  },
-});
+  }
+}

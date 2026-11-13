@@ -118,6 +118,10 @@ export interface Chart {
   from?: string;
   to?: string;
   maxDataPoints?: number;
+  // Optional link to the matching Grafana dashboard. Opens in a new tab when
+  // the rendered chart is clicked. Supports $node/$source/$target, $from and
+  // $to placeholders.
+  href?: string;
   series?: ChartSeries[];
 }
 
@@ -533,6 +537,7 @@ export const config: Config = {
     "AVM FRITZ!Box 7320",
     "AVM FRITZ!Box 7330",
     "AVM FRITZ!Box 7330 SL",
+    "Linksys WRT160NL",
     "TP-Link TL-MR13U v1",
     "TP-Link TL-MR3020 v1",
     "TP-Link TL-MR3040 v1",
