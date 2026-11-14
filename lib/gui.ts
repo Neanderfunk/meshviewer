@@ -164,7 +164,7 @@ export const Gui = function (language: ReturnType<typeof Language>) {
   tabs.add("sidebar.actual", overview);
   tabs.add("node.nodes", nodelist);
   tabs.add("node.inViewTab", ausschnittliste); // Neanderfunk
-  // Neanderfunk: kein Reiter "Verbindungen", an seiner Stelle "Ausschnitt"
+  // Neanderfunk: kein Reiter "Verbindungen", an seiner Stelle "Im Bild"
   tabs.add("sidebar.stats", statistics);
   tabs.add("sidebar.about", about);
 

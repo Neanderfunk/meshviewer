@@ -59,7 +59,7 @@ const headings: Heading<Node>[] = [
 ];
 
 // nurAusschnitt (Neanderfunk): nur Knoten im sichtbaren Kartenausschnitt,
-// fuer den Reiter "Ausschnitt"
+// fuer den Reiter "Im Bild"
 export const Nodelist = function (nurAusschnitt = false): CanSetData & CanRender {
   const router = window.router;
   const table = SortTable<Node>(headings, 1, renderRow);

@@ -74,7 +74,7 @@ export const Map = function (linkScale: LinkScale, sidebar: ReturnType<typeof Si
     }, 300);
   }
 
-  // Neanderfunk: Reiter "Ausschnitt" bekommt den sichtbaren Teil der Karte,
+  // Neanderfunk: Reiter "Im Bild" bekommt den sichtbaren Teil der Karte,
   // ohne die Seitenleiste (activearea)
   function ausschnittMelden() {
     if (!isDestroyed) {

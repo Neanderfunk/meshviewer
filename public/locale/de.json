@@ -49,7 +49,7 @@
       "ort-weg": "nicht auf der Landkarte",
       "name": "Name"
     },
-    "inViewTab": "Ausschnitt",
+    "inViewTab": "Im Bild",
     "inView": "%{smart_count} Knoten im Kartenausschnitt |||| %{smart_count} Knoten im Kartenausschnitt",
     "inViewMapOnly": "Nur in der Kartenansicht: hier gibt es keinen Ausschnitt."
   },

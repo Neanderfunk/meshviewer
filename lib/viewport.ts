@@ -1,4 +1,4 @@
-// Neanderfunk: der sichtbare Kartenausschnitt fuer den Reiter "Ausschnitt".
+// Neanderfunk: der sichtbare Kartenausschnitt fuer den Reiter "Im Bild".
 // Die Karte meldet ihn nach jedem Verschieben und Zoomen, die Knotenliste
 // hoert zu. null heisst: keine Karte da (Graph-Ansicht).
 import L from "leaflet";
