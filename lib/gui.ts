@@ -5,7 +5,6 @@ import { Container } from "./container.js";
 import { DataDistributor } from "./datadistributor.js";
 import { ForceGraph } from "./forcegraph.js";
 import { Legend } from "./legend.js";
-import { Linklist } from "./linklist.js";
 import { Nodelist } from "./nodelist.js";
 import { Map } from "./map.js";
 import { Proportions } from "./proportions.js";
@@ -137,7 +136,6 @@ export const Gui = function (language: ReturnType<typeof Language>) {
   const lostnodeslist = SimpleNodelist("lost", "lastseen", _.t("node.missing"));
   const nodelist = Nodelist();
   const ausschnittliste = Nodelist(true); // Neanderfunk
-  const linklist = Linklist(linkScale);
   const statistics = Proportions(fanout);
   const about = About(config.devicePicturesSource, config.devicePicturesLicense);
 
@@ -147,7 +145,6 @@ export const Gui = function (language: ReturnType<typeof Language>) {
   fanoutUnfiltered.add(infobox);
   fanout.add(nodelist);
   fanout.add(ausschnittliste);
-  fanout.add(linklist);
   fanout.add(statistics);
 
   sidebar.add(header);
@@ -167,7 +164,7 @@ export const Gui = function (language: ReturnType<typeof Language>) {
   tabs.add("sidebar.actual", overview);
   tabs.add("node.nodes", nodelist);
   tabs.add("node.inViewTab", ausschnittliste); // Neanderfunk
-  tabs.add("node.links", linklist);
+  // Neanderfunk: kein Reiter "Verbindungen", an seiner Stelle "Ausschnitt"
   tabs.add("sidebar.stats", statistics);
   tabs.add("sidebar.about", about);
 
