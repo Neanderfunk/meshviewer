@@ -48,7 +48,10 @@
       "ort": "location",
       "ort-weg": "hidden from the map",
       "name": "name"
-    }
+    },
+    "inViewTab": "In view",
+    "inView": "%{smart_count} node in view |||| %{smart_count} nodes in view",
+    "inViewMapOnly": "Map view only: the graph has no visible area."
   },
   "location": {
     "location": "Location",

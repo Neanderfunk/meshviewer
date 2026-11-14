@@ -37,7 +37,10 @@
     "link": "Bağlantı ||| Bağlantılar",
     "node": "Düğüm ||| Düğümler",
     "new": "Yeni düğümler",
-    "missing": "Kaybolan düğümler"
+    "missing": "Kaybolan düğümler",
+    "inViewTab": "In view",
+    "inView": "%{smart_count} node in view |||| %{smart_count} nodes in view",
+    "inViewMapOnly": "Map view only: the graph has no visible area."
   },
   "location": {
     "location": "Konum",

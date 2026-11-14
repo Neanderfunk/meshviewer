@@ -6,6 +6,7 @@ import * as helper from "./utils/helper.js";
 import { Node } from "./utils/node.js";
 import { CanSetData, ObjectsLinksAndNodes } from "./datadistributor.js";
 import { CanRender } from "./container.js";
+import * as viewport from "./viewport.js"; // Neanderfunk
 
 function showUptime(uptime: number) {
   let seconds = uptime / 60000;
@@ -57,9 +58,50 @@ const headings: Heading<Node>[] = [
   },
 ];
 
-export const Nodelist = function (): CanSetData & CanRender {
+// nurAusschnitt (Neanderfunk): nur Knoten im sichtbaren Kartenausschnitt,
+// fuer den Reiter "Ausschnitt"
+export const Nodelist = function (nurAusschnitt = false): CanSetData & CanRender {
   const router = window.router;
   const table = SortTable<Node>(headings, 1, renderRow);
+  let letzteDaten: ObjectsLinksAndNodes | undefined;
+  const h2 = document.createElement("h2");
+  const hinweis = document.createElement("p");
+  hinweis.classList.add("ausschnitt-hinweis");
+
+  if (nurAusschnitt) {
+    viewport.onChange(function () {
+      if (letzteDaten) {
+        zeigen(letzteDaten);
+      }
+    });
+  }
+
+  function imAusschnitt(node: Node) {
+    const bounds = viewport.getBounds();
+    return (
+      bounds !== null && helper.hasLocation(node) && bounds.contains([node.location.latitude, node.location.longitude])
+    );
+  }
+
+  function zeigen(nodesData: ObjectsLinksAndNodes) {
+    const now = nodesData.now ?? moment();
+    const knoten = nurAusschnitt ? nodesData.nodes.all.filter(imAusschnitt) : nodesData.nodes.all;
+    const nodesList = knoten.map(function (node) {
+      const nodeData = Object.create(node);
+      if (node.is_online) {
+        nodeData.uptime = now.valueOf() - new Date(node.uptime).getTime();
+      } else {
+        nodeData.uptime = node.lastseen.valueOf() - now.valueOf();
+      }
+      return nodeData;
+    });
+
+    if (nurAusschnitt) {
+      h2.textContent = _.t("node.inView", { smart_count: nodesList.length });
+      hinweis.textContent = viewport.getBounds() === null ? _.t("node.inViewMapOnly") : "";
+    }
+    table.setData(nodesList);
+  }
 
   function renderRow(node: Node) {
     let td0Content: string | VNode = "";
@@ -94,26 +136,20 @@ export const Nodelist = function (): CanSetData & CanRender {
 
   return {
     render(d: HTMLElement) {
-      const h2 = document.createElement("h2");
-      h2.textContent = _.t("node.all");
+      if (!nurAusschnitt) {
+        h2.textContent = _.t("node.all");
+      }
       d.appendChild(h2);
+      if (nurAusschnitt) {
+        d.appendChild(hinweis);
+      }
       table.el.classList.add("node-list");
       d.appendChild(table.el);
     },
 
     setData(nodesData: ObjectsLinksAndNodes) {
-      const now = nodesData.now ?? moment();
-      const nodesList = nodesData.nodes.all.map(function (node) {
-        const nodeData = Object.create(node);
-        if (node.is_online) {
-          nodeData.uptime = now.valueOf() - new Date(node.uptime).getTime();
-        } else {
-          nodeData.uptime = node.lastseen.valueOf() - now.valueOf();
-        }
-        return nodeData;
-      });
-
-      table.setData(nodesList);
+      letzteDaten = nodesData;
+      zeigen(nodesData);
     },
   };
 };

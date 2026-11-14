@@ -37,7 +37,10 @@
     "link": "Odkaz ||| Odkazy",
     "node": "Uzel ||| Uzly",
     "new": "Nové uzly",
-    "missing": "Zmizelé uzly"
+    "missing": "Zmizelé uzly",
+    "inViewTab": "In view",
+    "inView": "%{smart_count} node in view |||| %{smart_count} nodes in view",
+    "inViewMapOnly": "Map view only: the graph has no visible area."
   },
   "location": {
     "location": "Poloha",

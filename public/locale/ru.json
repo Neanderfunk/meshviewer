@@ -37,7 +37,10 @@
     "link": "Ссылка |||| Ссылки",
     "node": "Узел |||| Узлы",
     "new": "Новые узлы",
-    "missing": "Исчезнувшие узлы"
+    "missing": "Исчезнувшие узлы",
+    "inViewTab": "In view",
+    "inView": "%{smart_count} node in view |||| %{smart_count} nodes in view",
+    "inViewMapOnly": "Map view only: the graph has no visible area."
   },
   "location": {
     "location": "Расположение",

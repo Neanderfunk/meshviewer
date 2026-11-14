@@ -136,6 +136,7 @@ export const Gui = function (language: ReturnType<typeof Language>) {
   const newnodeslist = SimpleNodelist("new", "firstseen", _.t("node.new"));
   const lostnodeslist = SimpleNodelist("lost", "lastseen", _.t("node.missing"));
   const nodelist = Nodelist();
+  const ausschnittliste = Nodelist(true); // Neanderfunk
   const linklist = Linklist(linkScale);
   const statistics = Proportions(fanout);
   const about = About(config.devicePicturesSource, config.devicePicturesLicense);
@@ -145,6 +146,7 @@ export const Gui = function (language: ReturnType<typeof Language>) {
   fanoutUnfiltered.add(lostnodeslist);
   fanoutUnfiltered.add(infobox);
   fanout.add(nodelist);
+  fanout.add(ausschnittliste);
   fanout.add(linklist);
   fanout.add(statistics);
 
@@ -164,6 +166,7 @@ export const Gui = function (language: ReturnType<typeof Language>) {
   sidebar.add(tabs);
   tabs.add("sidebar.actual", overview);
   tabs.add("node.nodes", nodelist);
+  tabs.add("node.inViewTab", ausschnittliste); // Neanderfunk
   tabs.add("node.links", linklist);
   tabs.add("sidebar.stats", statistics);
   tabs.add("sidebar.about", about);

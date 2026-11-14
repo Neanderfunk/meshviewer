@@ -6,6 +6,7 @@ import { ClientLayer } from "./map/clientlayer.js";
 import { LabelLayer } from "./map/labellayer.js";
 import { Button } from "./map/button.js";
 import "./map/activearea.js";
+import * as viewport from "./viewport.js"; // Neanderfunk
 import { Sidebar } from "./sidebar.js";
 import { LatLng } from "leaflet";
 import { Link, LinkId, LinkScale, Node, NodeId } from "./utils/node.js";
@@ -67,7 +68,18 @@ export const Map = function (linkScale: LinkScale, sidebar: ReturnType<typeof Si
   }
 
   function setActiveArea() {
-    setTimeout(mapActiveArea, 300);
+    setTimeout(function () {
+      mapActiveArea();
+      ausschnittMelden();
+    }, 300);
+  }
+
+  // Neanderfunk: Reiter "Ausschnitt" bekommt den sichtbaren Teil der Karte,
+  // ohne die Seitenleiste (activearea)
+  function ausschnittMelden() {
+    if (!isDestroyed) {
+      viewport.setBounds(map.getBounds());
+    }
   }
 
   const el = document.createElement("div");
@@ -182,6 +194,8 @@ export const Map = function (linkScale: LinkScale, sidebar: ReturnType<typeof Si
   labelLayer.setZIndex(6);
 
   sidebar.button.addEventListener("visibility", setActiveArea);
+
+  map.on("moveend", ausschnittMelden);
 
   map.on("zoom", function () {
     clientLayer.redraw();
@@ -357,6 +371,7 @@ export const Map = function (linkScale: LinkScale, sidebar: ReturnType<typeof Si
     button.clearButtons();
     sidebar.button.removeEventListener("visibility", setActiveArea);
     map.remove();
+    viewport.setBounds(null);
 
     if (el.parentNode) {
       el.parentNode.removeChild(el);
