@@ -62,6 +62,7 @@
   },
   "sidebar": {
     "nodeFilter": "Node filter",
+    "removeAllFilters": "remove all filters",
     "nodes": "%{total} nodes, including %{online} nodes online",
     "clients": "with %{smart_count} client |||| with %{smart_count} clients",
     "gateway": "on %{smart_count} gateway |||| on %{smart_count} gateways",

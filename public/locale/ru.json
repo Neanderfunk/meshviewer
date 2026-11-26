@@ -51,6 +51,7 @@
   },
   "sidebar": {
     "nodeFilter": "Фильтр узлов",
+    "removeAllFilters": "убрать все фильтры",
     "nodes": "%{total} узлов, включая %{online} узлов онлайн",
     "clients": "с %{smart_count} клиентом |||| с %{smart_count} клиентами",
     "gateway": "на %{smart_count} шлюзе |||| на %{smart_count} шлюзах",

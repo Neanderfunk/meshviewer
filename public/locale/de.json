@@ -62,6 +62,7 @@
   },
   "sidebar": {
     "nodeFilter": "Knotenfilter",
+    "removeAllFilters": "alle Filter entfernen",
     "nodes": "%{total} Knoten, davon %{online} Knoten online",
     "clients": "mit %{smart_count} Nutzer |||| mit %{smart_count} Nutzern",
     "gateway": "auf %{smart_count} Gateway |||| auf %{smart_count} Gateways",

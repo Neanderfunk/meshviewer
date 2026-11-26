@@ -35,6 +35,22 @@ export const FilterGui = function (distributor: ReturnType<typeof DataDistributo
       li.appendChild(button);
     });
 
+    // Neanderfunk: ab zwei Filtern aus der Statistik alle auf einmal entfernen
+    const removable = filters.filter(function (filter) {
+      return !filter.clear;
+    });
+    if (removable.length > 1) {
+      const li = document.createElement("li");
+      li.classList.add("filter-remove-all");
+      const button = document.createElement("button");
+      button.textContent = _.t("sidebar.removeAllFilters");
+      button.onclick = function onclick() {
+        distributor.removeFilters(removable);
+      };
+      li.appendChild(button);
+      container.appendChild(li);
+    }
+
     if (container.parentNode === div && filters.length === 0) {
       div.removeChild(container);
     } else if (filters.length > 0) {

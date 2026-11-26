@@ -83,4 +83,17 @@
       visibility: hidden;
     }
   }
+
+  // Neanderfunk: alle Filter aus der Statistik auf einmal entfernen
+  .filter-remove-all {
+    border-style: dashed;
+    padding: 0;
+
+    button {
+      color: variables.$color-primary;
+      font-size: inherit;
+      padding: 0 10px;
+      width: auto;
+    }
+  }
 }

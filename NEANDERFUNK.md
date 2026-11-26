@@ -37,6 +37,7 @@ besteht die Tests des Projekts.
 | Reiter "Im Bild" | Liste der Knoten im sichtbaren Kartenausschnitt (rechts der Seitenleiste), folgt jedem Verschieben und Zoomen; in der Graph-Ansicht leer mit Hinweis. Anregung: Nutzerfrage (14.11.2026) |
 | Kein Reiter "Verbindungen" | die Linkliste der Seitenleiste entfällt, ihr Platz geht an "Im Bild" (adorfer 14.11.2026); `lib/linklist.ts` bleibt unverändert im Baum |
 | Namensfeld leeren | × am Knotenfilter, sobald etwas drinsteht: leert das Feld und filtert sofort neu; Filter mit `clear()` bleiben stehen statt zu verschwinden (adorfer 26.11.2026) |
+| Alle Filter entfernen | ab zwei Filtern aus der Statistik ein Knopf "alle Filter entfernen" hinter den Filtern, eine Neuberechnung statt einer je Filter (`removeFilters`); das Namensfeld bleibt (adorfer 26.11.2026) |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
 Zweig wie das Original, bis auf die Reiter: "Im Bild" ist immer da, "Verbindungen" nie;

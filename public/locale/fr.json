@@ -51,6 +51,7 @@
   },
   "sidebar": {
     "nodeFilter": "Filtre de nœud",
+    "removeAllFilters": "supprimer tous les filtres",
     "nodes": "%{total} nœud, dont %{online} nœuds en ligne",
     "clients": "avec %{smart_count} client |||| avec %{smart_count} clients",
     "gateway": "sur %{smart_count} passerelle |||| sur %{smart_count} passerelles",

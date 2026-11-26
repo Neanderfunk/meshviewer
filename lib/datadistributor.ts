@@ -125,6 +125,14 @@ export const DataDistributor = function () {
     refresh();
   }
 
+  // Neanderfunk: mehrere Filter auf einmal, mit nur einer Neuberechnung
+  function removeFilters(list: Filter[]) {
+    filters = filters.filter(function (currentElement) {
+      return !list.includes(currentElement);
+    });
+    refresh();
+  }
+
   function watchFilters(filterObserver: CanFiltersChanged) {
     filterObservers.push(filterObserver);
 
@@ -143,6 +151,7 @@ export const DataDistributor = function () {
     setData,
     addFilter,
     removeFilter,
+    removeFilters,
     watchFilters,
   };
 };

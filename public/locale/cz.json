@@ -51,6 +51,7 @@
   },
   "sidebar": {
     "nodeFilter": "nodeFilter",
+    "removeAllFilters": "odstranit všechny filtry",
     "nodes": "%{total} uzly, %{online} uzly on-line",
     "clients": "%{smart_count} klienti |||| %{smart_count} klienti",
     "gateway": " %{smart_count} gateway |||| %{smart_count} gateways",
