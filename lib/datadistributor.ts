@@ -28,6 +28,8 @@ export interface ObjectsLinksAndNodes {
 
 export interface Filter {
   getKey?: () => string;
+  // Neanderfunk: Filter, die immer bleiben (Namensfeld), leeren sich statt zu verschwinden
+  clear?: () => void;
   setRefresh(refresh: (preserveFocus?: boolean) => void): void;
   run(data: Node): boolean;
 }

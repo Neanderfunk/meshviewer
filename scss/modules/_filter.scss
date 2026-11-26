@@ -64,10 +64,23 @@
       &:focus {
         background: color.adjust(variables.$color-primary, $alpha: -0.95);
       }
+
+      // Neanderfunk: eigener Knopf statt des Kreuzes, das nur Chromium zeichnet
+      &::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+      }
     }
 
+    // Neanderfunk: der Knopf leert das Feld (HostnameFilter.clear), nur wenn etwas drinsteht;
+    // flach und mit festem Platz, damit die Zeile beim Tippen nicht springt
     button {
-      display: none;
+      height: 20px;
+      margin: 0 3px;
+    }
+
+    &:has(input:placeholder-shown) button {
+      visibility: hidden;
     }
   }
 }

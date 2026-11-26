@@ -25,7 +25,12 @@ export const FilterGui = function (distributor: ReturnType<typeof DataDistributo
       button.classList.add("ion-close");
       button.setAttribute("aria-label", _.t("remove"));
       button.onclick = function onclick() {
-        distributor.removeFilter(filter);
+        // Neanderfunk: das Namensfeld bleibt stehen und wird nur geleert
+        if (filter.clear) {
+          filter.clear();
+        } else {
+          distributor.removeFilter(filter);
+        }
       };
       li.appendChild(button);
     });

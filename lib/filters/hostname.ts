@@ -3,7 +3,7 @@ import { Node } from "../utils/node.js";
 import { CanRender } from "../container.js";
 import { Filter } from "../datadistributor.js";
 
-export const HostnameFilter = function (): CanRender & Filter {
+export const HostnameFilter = function (): CanRender & Filter & { clear: () => void } {
   const refreshFunctions: ((preserveFocus?: boolean) => void)[] = [];
   let timer: ReturnType<typeof setTimeout>;
   let input: HTMLInputElement | undefined;
@@ -30,6 +30,19 @@ export const HostnameFilter = function (): CanRender & Filter {
     refreshFunctions.push(f);
   }
 
+  // Neanderfunk: Knopf am Feld (aus FilterGui) leert es und filtert sofort neu
+  function clear() {
+    if (!input) {
+      return;
+    }
+    input.value = "";
+    clearTimeout(timer);
+    refreshFunctions.forEach(function (f) {
+      f(true);
+    });
+    input.focus();
+  }
+
   function render(el: HTMLElement) {
     // FilterGui re-renders all filters on every change, keep the input to retain the query and focus
     if (!input) {
@@ -48,5 +61,6 @@ export const HostnameFilter = function (): CanRender & Filter {
     run,
     setRefresh,
     render,
+    clear,
   };
 };

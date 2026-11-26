@@ -122,4 +122,49 @@ describe("HostnameFilter", () => {
     vi.useRealTimers();
     vi.unstubAllGlobals();
   });
+
+  // Neanderfunk: Knopf am Namensfeld
+  it("clear empties the input and refreshes at once, without the pending debounce", () => {
+    vi.useFakeTimers();
+    let inputListener: () => void = () => {};
+    const mockInput = {
+      type: "",
+      placeholder: "",
+      value: "router",
+      focus: vi.fn(),
+      setAttribute: vi.fn(),
+      addEventListener: vi.fn().mockImplementation((event, listener) => {
+        if (event === "input") {
+          inputListener = listener;
+        }
+      }),
+    };
+    const mockContainer = {
+      classList: {
+        add: vi.fn(),
+      },
+      appendChild: vi.fn(),
+    };
+    vi.stubGlobal("document", { createElement: vi.fn().mockReturnValue(mockInput) });
+
+    const filter = HostnameFilter();
+    const refreshSpy = vi.fn();
+    filter.setRefresh(refreshSpy);
+    filter.render(mockContainer as any);
+
+    inputListener();
+    filter.clear();
+
+    expect(mockInput.value).toBe("");
+    expect(refreshSpy).toHaveBeenCalledTimes(1);
+    expect(refreshSpy).toHaveBeenCalledWith(true);
+    expect(mockInput.focus).toHaveBeenCalled();
+    expect(filter.run(nodeB)).toBe(true);
+
+    vi.advanceTimersByTime(300);
+    expect(refreshSpy).toHaveBeenCalledTimes(1);
+
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
 });
