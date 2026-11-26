@@ -360,7 +360,10 @@ function renderD3Chart(
     h("thead", [
       h(
         "tr",
-        ["", "Name", "Mean", "Last", "Max", "Min"].map((t) => h("th", t)),
+        // Neanderfunk: Spaltenkoepfe uebersetzt, upstream fest englisch
+        ["", "node.chartName", "node.chartMean", "node.chartLast", "node.chartMax", "node.chartMin"].map((t) =>
+          h("th", t ? _.t(t) : ""),
+        ),
       ),
     ]),
     h("tbody", rows),

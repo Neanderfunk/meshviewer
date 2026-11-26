@@ -49,6 +49,11 @@
       "ort-weg": "hidden from the map",
       "name": "name"
     },
+    "chartName": "Name",
+    "chartMean": "Mean",
+    "chartLast": "Last",
+    "chartMax": "Max",
+    "chartMin": "Min",
     "inViewTab": "In view",
     "inView": "%{smart_count} node in view |||| %{smart_count} nodes in view",
     "inViewMapOnly": "Map view only: the graph has no visible area."

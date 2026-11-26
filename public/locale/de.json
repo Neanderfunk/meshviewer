@@ -49,6 +49,11 @@
       "ort-weg": "nicht auf der Landkarte",
       "name": "Name"
     },
+    "chartName": "Name",
+    "chartMean": "Durchschnitt",
+    "chartLast": "Zuletzt",
+    "chartMax": "Max",
+    "chartMin": "Min",
     "inViewTab": "Im Bild",
     "inView": "%{smart_count} Knoten im Kartenausschnitt |||| %{smart_count} Knoten im Kartenausschnitt",
     "inViewMapOnly": "Nur in der Kartenansicht: hier gibt es keinen Ausschnitt."

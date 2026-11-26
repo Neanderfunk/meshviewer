@@ -38,6 +38,11 @@
     "node": "Nœud |||| Nœuds",
     "new": "Nouveaux nœuds",
     "missing": "Nœuds disparus",
+    "chartName": "Nom",
+    "chartMean": "Moyenne",
+    "chartLast": "Dernier",
+    "chartMax": "Max",
+    "chartMin": "Min",
     "inViewTab": "Visibles",
     "inView": "%{smart_count} nœud visible sur la carte |||| %{smart_count} nœuds visibles sur la carte",
     "inViewMapOnly": "Seulement sur la carte, pas dans le graphe."
