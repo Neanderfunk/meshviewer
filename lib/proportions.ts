@@ -326,6 +326,12 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
       el.appendChild(links);
     }
 
+    // Lokaler Zusatz (Neanderfunk): Verlaeufe fuers ganze Netz zuerst, die
+    // Tabellen darunter zeigen nur den Stand jetzt
+    if (config.globalChartsOnTop) {
+      renderGlobalCharts(el);
+    }
+
     self.renderSingle(el, "node.status");
     self.renderSingle(el, "node.firmware");
     self.renderSingle(el, "node.baseversion");
@@ -352,13 +358,19 @@ export const Proportions = function (filterManager: ReturnType<typeof DataDistri
       patch(images, h("div", img));
     }
 
+    if (!config.globalChartsOnTop) {
+      renderGlobalCharts(el);
+    }
+  };
+
+  function renderGlobalCharts(el: HTMLElement) {
     if (config.globalCharts.length) {
       const chartsEl = document.createElement("div");
       el.appendChild(chartsEl);
       const charts = config.globalCharts.flatMap((chart) => [h("h2", chart.name), createChartVNode(chart, {})]);
       patch(chartsEl, h("div", charts));
     }
-  };
+  }
 
   self.renderSingle = function renderSingle(el: HTMLElement, mappingName: string) {
     const tableNode = tables[mappingName];

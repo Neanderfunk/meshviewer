@@ -167,6 +167,9 @@ export interface Config {
   serviceOverrides?: string;
   // Lokaler Zusatz (Neanderfunk): Links oben in der Statistik
   statisticsLinks?: Link[];
+  // Lokaler Zusatz (Neanderfunk): globalCharts oben in der Statistik, unter
+  // den statisticsLinks, statt ganz unten hinter allen Tabellen
+  globalChartsOnTop?: boolean;
   reverseGeocodingApi: string;
   maxAge: number;
   maxAgeAlert: number;

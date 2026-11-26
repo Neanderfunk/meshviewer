@@ -400,7 +400,8 @@ export function createChartVNode(chart: Chart, subst: Record<string, string>): V
             el.textContent = _.t("node.chartNoData", { name: chart.name });
             return;
           }
-          renderD3Chart(el, parsed, chart.format ?? ".2~s", chart.unitSuffix ?? "", configMap);
+          // Neanderfunk: integer auch hier, nicht nur im Knotenfenster
+          renderD3Chart(el, parsed, chart.format ?? ".2~s", chart.unitSuffix ?? "", configMap, chart.integer);
         } catch {
           el.textContent = _.t("node.chartError", { name: chart.name });
         }
