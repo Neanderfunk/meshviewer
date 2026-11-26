@@ -40,6 +40,7 @@ besteht die Tests des Projekts.
 | Alle Filter entfernen | ab zwei Filtern aus der Statistik ein Knopf "alle Filter entfernen" hinter den Filtern, eine Neuberechnung statt einer je Filter (`removeFilters`); das Namensfeld bleibt (adorfer 26.11.2026) |
 | Gesamtdiagramme oben | `globalChartsOnTop`: die `globalCharts` von upstream stehen im Reiter Statistiken direkt unter den `statisticsLinks` statt hinter allen Tabellen; `integer` gilt dort wie im Knotenfenster (adorfer 26.11.2026) |
 | Spaltenköpfe der Diagrammtabelle übersetzt | "Name, Durchschnitt, Zuletzt, Max, Min" statt fest "Name, Mean, Last, Max, Min" (`node.chartName` … `node.chartMin` in allen Sprachdateien; adorfer 26.11.2026) |
+| "Clients" statt "Nutzer" | de.json: Kopfzeile "mit 2556 Clients", Zeile "Clients" im Knotenfenster, "Clients in der lokalen Wolke" (adorfer 26.11.2026) |
 
 Alle neuen Konfigurationsschlüssel sind optional. Ohne sie verhält sich der
 Zweig wie das Original, bis auf die Reiter: "Im Bild" ist immer da, "Verbindungen" nie;
